@@ -31,3 +31,10 @@ npm run start
 |     3| SQL       |
 
 </details>
+
+
+```
+print("Hello, world!")
+for i in range(10):
+    print(i)
+```
