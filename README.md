@@ -1,7 +1,6 @@
 # cafeteria
-===========
 ## Descripción del Proyecto
-Proyecto web Full Stack.
+**Proyecto web Full Stack.**
 ### FrontEnd: Desarrollado en un entorno Node.Js utilizando
 las librerías de React
 
