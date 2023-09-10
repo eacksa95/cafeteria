@@ -1,3 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Estilos del banner */
+        .banner {
+            background-color: #0074d9; /* Color de fondo */
+            color: #fff; /* Color del texto */
+            padding: 20px; /* Espaciado interior */
+            text-align: center; /* Alineación del texto */
+            font-size: 18px; /* Tamaño de fuente */
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <!-- Contenido del banner -->
+        <h1>Cafeteria</h1>
+        <p>Sistema que funciona como un catalogo de productos para presentarlos a los clientes y que estos puedan elegir a través del menu los productos que desean pedir a la cocina. Los pedidos son gestionados en forma de cola o pila dependiendo de la prioridad que se le quiera dar.</p>
+    </div>
+    <!-- Resto del contenido del README -->
+    <h2>Tabla de Contenidos</h2>
+    <!-- Más contenido aquí -->
+</body>
+</html>
+
+
+
+
+
 # Cafetería
 
 Proyecto Full Stack gestión de pedidos de una cafetería
