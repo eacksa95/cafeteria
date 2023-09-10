@@ -1,5 +1,5 @@
-# =============  cafeteria
-## Descripción del Proyecto
+# cafeteria ☕
+Proyecto de Software Full Stack de entorno web, desarrollado para gestionar la atención al cliente y los pedidos.
 **Proyecto web Full Stack.**
 ### FrontEnd: Desarrollado en un entorno Node.Js utilizando
 las librerías de React
@@ -38,3 +38,9 @@ print("Hello, world!")
 for i in range(10):
     print(i)
 ```
+
+***
+
+---
+
+_________________
