@@ -13,7 +13,7 @@ e implementando las librerías de Django y Djando Rest Framework.
 git clone "url for this repository"
 npm install
 npm run start
-<header style="background-color: red;">
+<header style="background-color: red">
 Hola Mundo
 </header>
 <picture>
