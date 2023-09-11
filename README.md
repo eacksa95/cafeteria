@@ -1,6 +1,20 @@
 # cafeteria ☕
-Proyecto de Software Full Stack de entorno web, desarrollado para gestionar la atención al cliente y los pedidos.
-**Proyecto web Full Stack.**
+**Descripción del proyecto:**
+<p>Proyecto Web Full Stack para la atención de los clientes y la gestión de sus pedidos en un local gastronómico.</p>
+
+**Tabla de Contenido:**
+<details>
+<summary>Modulo BackEnd</summary>
+
+| Rank | Languages |
+|-----:|-----------|
+|     1| Javascript|
+|     2| Python    |
+|     3| SQL       |
+
+</details>
+
+
 ### FrontEnd: Desarrollado en un entorno Node.Js utilizando
 las librerías de React
 
