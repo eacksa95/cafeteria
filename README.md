@@ -33,5 +33,3 @@ Para instalar las dependencias del proyecto, siga estos pasos:
 ## Correr migraciones
 Para crear la base de datos localmente deben correr el siguiente comando
 `python .\manage.py migrate`
-
-7kAQA10dAiXkokBX

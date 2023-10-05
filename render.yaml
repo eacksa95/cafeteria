@@ -9,3 +9,4 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=cafeteria_be.settings
     env: python=3.10
+    
