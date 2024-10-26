@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 //estilos
-import './estilos/App.css'
+import './estilos/app.css'
 
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';

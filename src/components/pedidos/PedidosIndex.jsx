@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import '../../estilos/Pedidos.css'
+import '../../estilos/pedidos.css'
 
 const PedidosIndex = ({ children }) => {
   return (

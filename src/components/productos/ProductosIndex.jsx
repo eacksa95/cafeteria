@@ -1,4 +1,4 @@
-import '../../estilos/Productos.css'
+import '../../estilos/productos.css'
 import { Link } from 'react-router-dom'
 
 const ProductosIndex = ({ children }) => {
