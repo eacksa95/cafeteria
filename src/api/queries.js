@@ -1,6 +1,9 @@
+
 import { useQuery, useMutation } from '@tanstack/react-query';
 
-const API_URL = 'https://be-cafeteria.onrender.com';
+// Configura la URL base del API
+const API_URL = 'http://localhost:8000';
+//const API_URL = 'https://be-cafeteria.onrender.com';
 
 const fetchWithAuth = async (url) => {
   const response = await fetch(`${API_URL}${url}`, {
@@ -21,22 +24,28 @@ const fetchWithAuth = async (url) => {
 export const useLogin = () => {
   return useMutation({
     mutationFn: async ({ username, password }) => {
-      const response = await fetch(`${API_URL}/api/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+      try {
+        const response = await fetch(`${API_URL}/api/token/`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ username, password }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Credenciales inválidas');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Credenciales inválidas');
+        }
+
+        return response.json();
+      } catch (error) {
+        if (error.message === 'Failed to fetch') {
+          throw new Error('No se pudo conectar al servidor. Por favor, verifica tu conexión.');
+        }
+        throw error;
       }
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      return data;
     },
   });
 };

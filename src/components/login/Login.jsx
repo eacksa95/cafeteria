@@ -8,7 +8,6 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
-
   const loginMutation = useLogin();
 
   useEffect(() => {
@@ -64,6 +63,7 @@ const Login = ({ onLogin }) => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={loginMutation.isLoading}
           />
         </div>
 
@@ -76,6 +76,7 @@ const Login = ({ onLogin }) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loginMutation.isLoading}
           />
         </div>
 

@@ -14,16 +14,20 @@
   ),
   url('/coffee-bg.jpg') center/cover;
   padding: var(--spacing-md);
+  position: relative;
+  z-index: 1;
 }
 
 .login-form {
   width: 100%;
   max-width: 400px;
-  background-color: var(--secondary-light);
+  background-color: var(--bg-primary);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-lg);
   animation: fadeIn 0.5s ease-out;
+  position: relative;
+  z-index: 2;
 }
 
 .login-title {
@@ -33,26 +37,27 @@
   text-align: center;
 }
 
-.coffee-icon {
-  display: block;
-  margin: 0 auto var(--spacing-lg);
-  filter: invert(20%) sepia(40%) saturate(500%) hue-rotate(346deg) brightness(90%) contrast(91%);
-  animation: float 3s ease-in-out infinite;
+.text-center {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group {
   margin-bottom: var(--spacing-md);
+  position: relative;
 }
 
 .form-input {
   width: 100%;
-  color: var(--text-primary);
   padding: var(--spacing-sm) var(--spacing-md);
+  padding-left: calc(var(--spacing-lg) + var(--spacing-md));
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-base);
-  transition: border-color var(--transition-normal);
+  transition: all var(--transition-normal);
   background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .form-input:focus {
@@ -63,6 +68,22 @@
 
 .form-input::placeholder {
   color: var(--text-muted);
+}
+
+.form-input:disabled {
+  background-color: var(--bg-secondary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+  font-size: var(--font-size-lg);
+  pointer-events: none;
 }
 
 .btn-primary {
@@ -83,6 +104,11 @@
   background-color: var(--primary-dark);
 }
 
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .alert {
   width: 100%;
   max-width: 400px;
@@ -90,6 +116,9 @@
   border-radius: var(--border-radius-md);
   margin-bottom: var(--spacing-md);
   text-align: center;
+  background-color: var(--danger-color);
+  color: var(--text-light);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .alert-error {
@@ -121,11 +150,21 @@
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    padding: var(--spacing-sm);
+    background-attachment: scroll;
+  }
+
   .login-form {
     padding: var(--spacing-lg);
+    width: 90%;
   }
 
   .login-title {
     font-size: var(--font-size-xl);
+
+  .form-input {
+    font-size: var(--font-size-sm);
+  }
   }
 }
