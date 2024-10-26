@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import coffeeIcon from '../../assets/coffee.svg';
 import jwtDecode from 'jwt-decode';
-import '@styles/login.css';
+import '../../estilos/login.css';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
