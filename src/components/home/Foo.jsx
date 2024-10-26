@@ -1,21 +1,52 @@
-import { Link } from 'react-router-dom'
-import React from 'react'
+import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInfoCircle, faEnvelope, faTimes } from '@fortawesome/free-solid-svg-icons';
+import About from '../info/About';
+import Contact from '../info/Contact';
+import '../../estilos/info.css';
 
 export const Foo = () => {
-    return (
-        <React.Fragment>
-            <footer>
-                <div>
-                    <button type="submit"> <span>
-                        <Link to="/about" className='aboutLink'>Nosotros</Link>
-                    </span></button>
-                </div>
-                <div>
-                    <button type="submit"> <span>
-                        <Link to="/contact" className='aboutLink'>Contacto</Link>
-                    </span></button>
-                </div>
-            </footer>
-        </React.Fragment>
-    )
-}
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+
+  return (
+    <>
+      <footer className="main-footer">
+        <div className="footer-content">
+          <button onClick={() => setShowAbout(true)} className="footer-link">
+            <FontAwesomeIcon icon={faInfoCircle} className="footer-icon" />
+            <span>Nosotros</span>
+          </button>
+          <button onClick={() => setShowContact(true)} className="footer-link">
+            <FontAwesomeIcon icon={faEnvelope} className="footer-icon" />
+            <span>Contacto</span>
+          </button>
+        </div>
+      </footer>
+
+      {/* About Modal */}
+      <div className={`modal-overlay ${showAbout ? 'show' : ''}`} onClick={() => setShowAbout(false)}>
+        <div className="modal-container" onClick={e => e.stopPropagation()}>
+          <button className="modal-close" onClick={() => setShowAbout(false)}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          <div className="modal-content">
+            <About />
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Modal */}
+      <div className={`modal-overlay ${showContact ? 'show' : ''}`} onClick={() => setShowContact(false)}>
+        <div className="modal-container" onClick={e => e.stopPropagation()}>
+          <button className="modal-close" onClick={() => setShowContact(false)}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          <div className="modal-content">
+            <Contact />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

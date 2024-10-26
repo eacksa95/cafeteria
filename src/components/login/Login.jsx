@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react'
-import coffeeIcon from '../../assets/coffee.svg'
-import jwtDecode from 'jwt-decode'
-
-//estilos
-import '../../estilos/Login.css'
+import { useState, useEffect } from 'react';
+import coffeeIcon from '../../assets/coffee.svg';
+import jwtDecode from 'jwt-decode';
+import '../../estilos/login.css';
 
 const Login = ({ onLogin }) => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-
-
-  //Mensajes del sistema en pantalla
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
-  //cuando mensaje cambia, mostrar mensaje por 3 segundos
+
   useEffect(() => {
     if (mensaje) {
       setMostrarMensaje(true);
@@ -24,94 +19,88 @@ const Login = ({ onLogin }) => {
     }
   }, [mensaje]);
 
-
-
-  const loginHandle = (e) => {
+  const loginHandle = async (e) => {
     e.preventDefault();
+    
     if (!username) {
-      setMensaje("Debe proporcionar usuario");
+      setMensaje("Por favor ingrese su nombre de usuario");
       return;
     }
     if (!password) {
-      setMensaje("Debe proporcionar Contraseña");
+      setMensaje("Por favor ingrese su contraseña");
       return;
     }
-  
-    // login and get a user with JWT token
+
     try {
-      fetch("http://localhost:8000/api/token/", {
+      const response = await fetch("http://localhost:8000/api/token/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            // Login exitoso
-            return res.json();
-          } else {
-            throw new Error("Error en el login.");
-          }
-        })
-        .then((tokenData) => {
-          if (tokenData.error) {
-            setMensaje("Error iniciando sesión"); // Actualizar el mensaje de error si está presente en la respuesta
-            return;
-          }
-          window.localStorage.setItem("accessToken", JSON.stringify(tokenData.access) );
-          console.log(tokenData);
-          console.log(jwtDecode(tokenData.access).user_id);
-          onLogin(jwtDecode(tokenData.access).user_id);
-        })
-        .catch((error) => {
-          setMensaje("Error en el login"); // Manejar el error de autenticación aquí
-          console.log(error);
-        });
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error en el login.");
+      }
+
+      const tokenData = await response.json();
+      
+      if (tokenData.error) {
+        setMensaje("Credenciales inválidas");
+        return;
+      }
+
+      window.localStorage.setItem("accessToken", JSON.stringify(tokenData.access));
+      onLogin(jwtDecode(tokenData.access).user_id);
+      
     } catch (error) {
-      console.log(error);
+      console.error('Error:', error);
+      setMensaje("Error al iniciar sesión. Por favor intente nuevamente.");
     }
   };
 
-
-
-
-
   return (
-    <>
+    <div className="login-container">
+      {mostrarMensaje && (
+        <div className="alert alert-error">
+          {mensaje}
+        </div>
+      )}
 
-      <div className='contenedorMensajes'>
-        {mostrarMensaje && <span>{mensaje}</span>}
-      </div>
+      <form className="login-form" onSubmit={loginHandle}>
 
-      <form onSubmit={loginHandle}>
-        <img src={coffeeIcon} alt="Coffee Icon" width={100} />
-        <h2>Coffee Time</h2>
-        <p>Please login to your account</p>
-        <input
-          aria-label="Username"
-          placeholder="Username"
-          id="username"
-          type="text"
-          onChange={(e) => {
-            setUsername(e.target.value)
-          }}
-        />
-        <input
-          aria-label="Password"
-          placeholder="Password"
-          id="password"
-          type="password"
-          onChange={(e) => {
-            setPassword(e.target.value)
-          }}
-        />
-        <button type="submit">Login</button>
+        <h2 className="login-title">Coffee Time</h2>
+        <p className="text-center mb-4">Bienvenido a tu espacio de café</p>
+        
+        <div className="form-group">
+          <input
+            className="form-input"
+            aria-label="Username"
+            placeholder="Nombre de usuario"
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <input
+            className="form-input"
+            aria-label="Password"
+            placeholder="Contraseña"
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="btn-primary">
+          Iniciar sesión
+        </button>
       </form>
-    </>
+    </div>
+  );
+};
 
-  )
-}
-
-export default Login
+export default Login;

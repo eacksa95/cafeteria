@@ -1,0 +1,61 @@
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Paleta de colores principal */
+        --primary-color: #904E2A;     /* Café oscuro */
+        --primary-light: #b86c44;     /* Café claro */
+        --primary-dark: #703d21;      /* Café muy oscuro */
+        --accent-color: #D4B08C;      /* Café beige */
+        
+        /* Colores secundarios */
+        --secondary-color: #f7d2ad;   /* Beige claro */
+        --secondary-light: #FFF8F0;   /* Beige muy claro */
+        --secondary-dark: #E6D5C3;    /* Beige oscuro */
+        
+        /* Colores de estado */
+        --success-color: #2D5A27;     /* Verde oscuro */
+        --danger-color: #A94442;      /* Rojo oscuro */
+        --warning-color: #E6A23C;     /* Naranja */
+        --info-color: #31708F;        /* Azul oscuro */
+        
+        /* Colores de texto */
+        --text-primary: #2C1810;      /* Café muy oscuro */
+        --text-secondary: #5D4037;    /* Café medio */
+        --text-light: #FFFFFF;        /* Blanco */
+        --text-muted: #7F6E69;        /* Café grisáceo */
+        
+        /* Colores de fondo */
+        --bg-primary: #FFFFFF;        /* Blanco */
+        --bg-secondary: #F9F6F2;      /* Beige muy claro */
+        --bg-dark: #2C1810;          /* Café muy oscuro */
+        
+        /* Bordes y sombras */
+        --border-color: #D4B08C;      /* Café beige */
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 16px;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+        
+        /* Espaciado */
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        
+        /* Tipografía */
+        --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 1.875rem;
+        
+        /* Transiciones */
+        --transition-fast: 150ms ease;
+        --transition-normal: 300ms ease;
+        --transition-slow: 500ms ease;
+      }}

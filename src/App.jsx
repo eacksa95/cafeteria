@@ -34,14 +34,14 @@ function App() {
   }
 
   return (
-    <>
+    <div className="app-container">
       {userId ? (
         <Home onLogout={onLogoutHandler} userId={userId} />
       ) : (
         <Login onLogin={onLoginHandler} />
       )}
 
-    </>
+    </div>
   )
 }
 

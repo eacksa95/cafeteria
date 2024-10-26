@@ -1,100 +1,142 @@
-import Table from 'react-bootstrap/Table';
-import { useState, useEffect } from 'react'
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-//iconos FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faPaintBrush } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPaintBrush, faCoffee, faSearch, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { useProductos } from '../../api/queries';
 
 const ProductosTabla = ({ setMensaje }) => {
-  const [actualizar, setActualizar] = useState(false)
-  const [productos, setProductos] = useState([])
+  const [actualizar, setActualizar] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: productos, isLoading, error } = useProductos();
   const navigate = useNavigate();
-
-
-  //productos[]
-  useEffect(() => {
-    try {
-      fetch('http://localhost:8000/productos/', {
-        method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setProductos(data)
-        }
-        )
-    } catch (e) { console.log("error GET Productos:", e) }
-  }, [actualizar])
 
   const onModificarProducto = (producto) => {
     navigate(`/productosmodificar/${producto.id}`);
-  }
+  };
 
-  //Eliminar Producto
-  const onDeleteProducto = (producto) => {
+  const onDeleteProducto = async (producto) => {
+    if (!window.confirm('¿Está seguro que desea eliminar este producto?')) {
+      return;
+    }
+
     try {
-      fetch(`http://localhost:8000/productos/${producto.id}/`, {
+      const response = await fetch(`http://localhost:8000/productos/${producto.id}/`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`
         },
-      })
-        .then(() => {
-          setMensaje("Producto Eliminado")
-          setActualizar(!actualizar)
-        }
-        )
-    } catch (e) { console.log("error onNuevoPedido:", e) }
+      });
+
+      if (response.ok) {
+        setMensaje("Producto eliminado exitosamente");
+        setActualizar(!actualizar);
+      } else {
+        throw new Error('Error al eliminar el producto');
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      setMensaje("Error al eliminar el producto");
+    }
+  };
+
+  const filteredProducts = productos?.filter(producto =>
+    producto.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  if (isLoading) {
+    return (
+      <div className="productos-table-container">
+        <div className="table-header">
+          <h4>Lista de Productos</h4>
+        </div>
+        <div className="loading-container">
+          <FontAwesomeIcon icon={faCoffee} spin />
+          <p>Cargando productos...</p>
+        </div>
+      </div>
+    );
   }
 
-
-
-
+  if (error) {
+    return (
+      <div className="productos-table-container">
+        <div className="table-header">
+          <h4>Lista de Productos</h4>
+        </div>
+        <div className="error-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} />
+          <p>Error al cargar los productos. Por favor, intente nuevamente.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className='contenedorTabla'>
-      <div className='titulo'>
+    <div className="productos-table-container">
+      <div className="table-header">
         <h4>Lista de Productos</h4>
+        <div className="search-container">
+          <FontAwesomeIcon icon={faSearch} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Buscar productos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
       </div>
-
-      <Table striped bordered hover className='Tabla'>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productos.map((producto) => {
-            return (
+      
+      <div className="table-wrapper">
+        <table className="productos-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.map((producto) => (
               <tr key={producto.id}>
                 <td>{producto.id}</td>
                 <td>{producto.nombre}</td>
-                <td>{producto.precio}</td>
-                <td>
-                  <button className='botonProcesar' onClick={() => { onModificarProducto(producto) }}>
-                    <FontAwesomeIcon icon={faPaintBrush} />
-                  </button>
+                <td className="precio-column">
+                  ${Number(producto.precio).toFixed(2)}
                 </td>
                 <td>
-                  <button className='botonEliminar' onClick={() => { onDeleteProducto(producto) }}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
+                  <div className="action-buttons">
+                    <button 
+                      className="btn-edit"
+                      onClick={() => onModificarProducto(producto)}
+                      title="Editar producto"
+                    >
+                      <FontAwesomeIcon icon={faPaintBrush} />
+                    </button>
+                    <button 
+                      className="btn-delete"
+                      onClick={() => onDeleteProducto(producto)}
+                      title="Eliminar producto"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </div>
                 </td>
-              </tr>)
-          })}
-        </tbody>
-      </Table>
-    </div>
-  )
-}
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-export default ProductosTabla
+        {filteredProducts.length === 0 && (
+          <div className="no-products">
+            <FontAwesomeIcon icon={faCoffee} />
+            <p>No se encontraron productos</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ProductosTabla;

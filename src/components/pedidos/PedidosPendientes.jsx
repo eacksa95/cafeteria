@@ -1,225 +1,162 @@
-import { useState, useEffect } from 'react'
-import Table from 'react-bootstrap/Table';
-//iconos FontAwesome
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCheck, faCoffee, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { usePedidos } from '../../api/queries';
 
+const PedidosPendientes = ({ setMensaje }) => {
+  const { data: pedidos, isLoading, error } = usePedidos();
+  const [actualizar, setActualizar] = useState(false);
 
+  if (isLoading) {
+    return (
+      <div className="contenedorTabla">
+        <div className="table-header">
+          <h4>Pedidos Pendientes</h4>
+        </div>
+        <div className="loading-container">
+          <FontAwesomeIcon icon={faCoffee} spin />
+          <p>Cargando pedidos...</p>
+        </div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="contenedorTabla">
+        <div className="table-header">
+          <h4>Pedidos Pendientes</h4>
+        </div>
+        <div className="error-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} />
+          <p>Error al cargar los pedidos. Por favor, intente nuevamente.</p>
+        </div>
+      </div>
+    );
+  }
 
-//--------------------------------------------------------------//
-
-const PedidosPendientes = ({
-  setMensaje
-}) => {
-  const [pedidos, setPedidos] = useState([])
-  const [actualizar, setActualizar] = useState(false)
-  const [productos, setProductos] = useState([])
-
-  //lista de pedidos inicial
-  useEffect(() => {
-    fetch('http://localhost:8000/pedidos/', {
-      method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPedidos(data)
-      })
-  }, [])
-
-  //actualizar lista de pedidos
-  useEffect(() => {
-    fetch('http://localhost:8000/pedidos/', {
-      method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPedidos(data)
-      })
-  }, [actualizar])
-
-  //actualizar lista de productos para pedidos.lista_productos
-  useEffect(() => {
-    fetch('http://localhost:8000/productos/', {
-      method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setProductos(data)
-      })
-  }, [actualizar])
-
-
-  const onProcesarPedido = (pedido) => {
-    //preparando los nombres de variables para el body del request
-    const id = pedido.id
-    const cliente = pedido.cliente
-    const mesa = pedido.mesa
-    const lista_productos = pedido.lista_productos
-    const lista_cantidad = pedido.lista_cantidad
-    const monto = pedido.monto
-    const estado = "listo"
-    const fecha_recepcion = pedido.fecha_recepcion
-    const hora_recepcion = pedido.hora_recepcion
+  const procesarPedido = async (pedido) => {
     const currentDate = new Date();
     const hora_listo = currentDate.toLocaleTimeString([], { hour12: false });
-    const hora_entregado = pedido.hora_entregado
-    // solicitud PUT utilizando fetch: pedido.estado="listo" - setHoraListo
+    
     try {
-      fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
+      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id,
-          cliente,
-          mesa,
-          lista_productos,
-          lista_cantidad,
-          monto,
-          estado,
-          fecha_recepcion,
-          hora_recepcion,
-          hora_listo,
-          hora_entregado
-
+          ...pedido,
+          estado: "listo",
+          hora_listo
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('Pedido procesado:', data);
-          setMensaje("Pedido Listo para servir")
-          setActualizar(!actualizar)
-        })
+      });
+      
+      if (response.ok) {
+        setMensaje("Pedido marcado como listo");
+        setActualizar(!actualizar);
+      }
     } catch (error) {
-      // Manejo de errores en caso de que la solicitud falle
       console.error('Error al procesar el pedido:', error);
-    };
+      setMensaje("Error al procesar el pedido");
+    }
   };
 
+  const eliminarPedido = async (pedido) => {
+    if (!window.confirm('¿Está seguro que desea eliminar este pedido?')) {
+      return;
+    }
 
-  //Eliminar pedido
-  const deletePedido = (pedido) => {
     try {
-      fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
+      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
         }
-        //delete no requiere body
-      })
-        .then(() => {
-          console.log('Pedido eliminado:');
-          setMensaje("Pedido Cancelado")
-          setActualizar(!actualizar)
-          //pregunta: porque al actualizar el estado actualizar
-          //el componente no vuelve a renderizar la lista en la tabla?
-          //Resuelto. faltaba agregar el ,[actualizar] al use efect
-        })
+      });
+      
+      if (response.ok) {
+        setMensaje("Pedido eliminado correctamente");
+        setActualizar(!actualizar);
+      }
     } catch (error) {
       console.error('Error al eliminar el pedido:', error);
-    };
-  }
+      setMensaje("Error al eliminar el pedido");
+    }
+  };
 
+  const pedidosPendientes = pedidos?.filter(pedido => pedido.estado === "pendiente") || [];
 
   return (
-    <div className='contenedorTabla'>
-     
-      <div className='titulo'>
+    <div className="contenedorTabla">
+      <div className="table-header">
         <h4>Pedidos Pendientes</h4>
       </div>
 
-      {pedidos.map((pedido) => {
-        if (pedido.estado === "pendiente") {
-          // Obtener el formato válido para la fecha
-          const hora_recepcion = pedido.hora_recepcion; // Obtener la hora de recepción en formato de cadena de texto
-          const [hora, minutos] = hora_recepcion.split(':');
-          let horaAMPM = "";
+      <div className="table-content">
+        {pedidosPendientes.map((pedido) => {
+          const [hora, minutos] = pedido.hora_recepcion.split(':');
           const fechaActual = new Date();
           fechaActual.setHours(hora);
           fechaActual.setMinutes(minutos);
 
-          horaAMPM = fechaActual.toLocaleString('en-US', {
+          const horaAMPM = fechaActual.toLocaleString('en-US', {
             hour: 'numeric',
             minute: 'numeric',
             hour12: true
           });
+
           return (
-            <div className='card_pedido' key={pedido.id}>
-              <div className='card_header'>
-                <span>Id: {pedido.id}</span>
-                <span>Mesa: {pedido.mesa}</span>
-                <span>Cliente: {pedido.cliente}</span>
-                <span>Entrada: {horaAMPM}</span>
+            <div className="card_pedido" key={pedido.id}>
+              <div className="pedido-info">
+                <h3>Pedido #{pedido.id}</h3>
+                <p>
+                  <span>Cliente:</span>
+                  <span>{pedido.cliente}</span>
+                </p>
+                <p>
+                  <span>Mesa:</span>
+                  <span>{pedido.mesa}</span>
+                </p>
+                <p>
+                  <span>Hora:</span>
+                  <span>{horaAMPM}</span>
+                </p>
+                <p>
+                  <span>Total:</span>
+                  <span>${pedido.monto}</span>
+                </p>
               </div>
-              <div className='card_contenido'>
-                <div className='card_lista'>
-                  <div className='titulo'>A preparar:</div>
-
-                  <div className='listaproductos'>
-                    <Table striped bordered hover className='Tabla'>
-                      <thead>
-                        <tr>
-                          <th>Producto</th>
-                          <th>Cantidad</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-
-                        {pedido.lista_productos.map((productoId, index) => {
-                          const producto = productos.find((p) => p.id === productoId);
-                          if (producto) {
-                            const cantidad = pedido.lista_cantidad[index]; // Obtiene la cantidad correspondiente al producto actual
-                            return (
-                            <tr key={producto.id}>
-                              <td>{producto.nombre}</td>
-                              <td>{cantidad}</td>
-                            </tr>);
-                          }
-                          return null;
-                        })}
-                      </tbody>
-                    </Table>
-                  </div>
-                </div>
-                <div className='card_botonera'>
-                  <div>
-                    <button className='botonEliminar' onClick={() => { deletePedido(pedido) }}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </div>
-                  <div>
-                    <button className='botonProcesar' onClick={() => { onProcesarPedido(pedido) }}>
-                      <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }} />
-                    </button>
-                  </div>
-
-                </div>
+              
+              <div className="pedido-actions">
+                <button 
+                  className="btn-action btn-procesar"
+                  onClick={() => procesarPedido(pedido)}
+                >
+                  <FontAwesomeIcon icon={faCheck} />
+                  <span>Procesar</span>
+                </button>
+                <button 
+                  className="btn-action btn-eliminar"
+                  onClick={() => eliminarPedido(pedido)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                  <span>Eliminar</span>
+                </button>
               </div>
-
-
             </div>
-          )
-        } return null;
-      })} 
+          );
+        })}
+
+        {pedidosPendientes.length === 0 && (
+          <div className="no-pedidos">
+            <p>No hay pedidos pendientes</p>
+          </div>
+        )}
+      </div>
     </div>
-    )
+  );
+};
 
-}
-
-export default PedidosPendientes
+export default PedidosPendientes;

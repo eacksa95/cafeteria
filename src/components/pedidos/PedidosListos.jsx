@@ -1,174 +1,162 @@
-import Table from 'react-bootstrap/Table';
-import { useState, useEffect } from 'react'
-
-//iconos FontAwesome
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCheck, faCoffee, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { usePedidos } from '../../api/queries';
 
 const PedidosListos = ({ setMensaje }) => {
-  const [pedidos, setPedidos] = useState([])
-  const [actualizar, setActualizar] = useState(false)
+  const { data: pedidos, isLoading, error } = usePedidos();
+  const [actualizar, setActualizar] = useState(false);
 
-  //pedidos[]
-  useEffect(() => {
-    fetch('http://localhost:8000/pedidos/', {
-      method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPedidos(data)
-      })
-  }, [])
+  if (isLoading) {
+    return (
+      <div className="contenedorTabla">
+        <div className="table-header">
+          <h4>Pedidos Listos</h4>
+        </div>
+        <div className="loading-container">
+          <FontAwesomeIcon icon={faCoffee} spin />
+          <p>Cargando pedidos...</p>
+        </div>
+      </div>
+    );
+  }
 
-  //Actualizar lista de pedidos
-  useEffect(() => {
-    fetch('http://localhost:8000/pedidos/', {
-      method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPedidos(data)
-      })
-  }, [actualizar])
+  if (error) {
+    return (
+      <div className="contenedorTabla">
+        <div className="table-header">
+          <h4>Pedidos Listos</h4>
+        </div>
+        <div className="error-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} />
+          <p>Error al cargar los pedidos. Por favor, intente nuevamente.</p>
+        </div>
+      </div>
+    );
+  }
 
-  //Filtrar pedidos por estado === "listo"
-  // const pedidos_listos = (pedidos) => { pedidos.map() }
-
-
-
-
-  const entregarPedido = (pedido) => {
-    //preparando los nombres de variables para el body del request
-    // Aquí es posible dejar comentarios sobre cambios en el modelo backend o modificaciones en el fetch.
-    const id = pedido.id
-    const cliente = pedido.cliente
-    const mesa = pedido.mesa
-    const lista_productos = pedido.lista_productos
-    const lista_cantidad = pedido.lista_cantidad
-    const monto = pedido.monto
-    const estado = "entregado"
-    const fecha_recepcion = pedido.fecha_recepcion
-    const hora_recepcion = pedido.hora_recepcion
-    const hora_listo = pedido.hora_listo
+  const entregarPedido = async (pedido) => {
     const currentDate = new Date();
     const hora_entregado = currentDate.toLocaleTimeString([], { hour12: false });
     
-    // Ejemplo de solicitud POST utilizando fetch:
     try {
-      fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
+      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id,
-          cliente,
-          mesa,
-          lista_productos,
-          lista_cantidad,
-          monto,
-          estado,
-          fecha_recepcion,
-          hora_recepcion,
-          hora_listo,
+          ...pedido,
+          estado: "entregado",
           hora_entregado
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('Pedido entregado:', data);
-          setMensaje("Pedido Entregado")
-          setActualizar(!actualizar)
-        })
+      });
+      
+      if (response.ok) {
+        setMensaje("Pedido entregado correctamente");
+        setActualizar(!actualizar);
+      }
     } catch (error) {
-      // Manejo de errores en caso de que la solicitud falle
-      console.error('Error al procesar el pedido:', error);
-    };
+      console.error('Error al entregar el pedido:', error);
+      setMensaje("Error al entregar el pedido");
+    }
   };
 
+  const eliminarPedido = async (pedido) => {
+    if (!window.confirm('¿Está seguro que desea eliminar este pedido?')) {
+      return;
+    }
 
-  //Eliminar pedido
-
-  const deletePedido = (pedido) => {
     try {
-      fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
+      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-
         }
-        //delete no requiere body
-      })
-        .then(() => {
-          setMensaje("Pedido Cancelado.");
-          setActualizar(!actualizar);
-          //pregunta: porque al actualizar el estado actualizar
-          //el componente no vuelve a renderizar la lista en la tabla?
-        })
+      });
+      
+      if (response.ok) {
+        setMensaje("Pedido eliminado correctamente");
+        setActualizar(!actualizar);
+      }
     } catch (error) {
-      // Manejo de errores en caso de que la solicitud falle
       console.error('Error al eliminar el pedido:', error);
-    };
-  }
+      setMensaje("Error al eliminar el pedido");
+    }
+  };
 
-
+  const pedidosListos = pedidos?.filter(pedido => pedido.estado === "listo") || [];
 
   return (
-    <div className='contenedorTabla'>
-      <div className='titulo'>
+    <div className="contenedorTabla">
+      <div className="table-header">
         <h4>Pedidos Listos</h4>
       </div>
 
-      <Table striped bordered hover className='Tabla'>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Cliente</th>
-            <th>Mesa</th>
-            <th>Productos</th>
-            <th>Monto</th>
-            <th>Entregado</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pedidos.map((pedido) => {
-            if (pedido.estado === "listo") {
-              return (
-                <tr key={pedido.id}>
-                  <td>{pedido.id}</td>
-                  <td>{pedido.cliente}</td>
-                  <td>{pedido.mesa}</td>
-                  <td> Productos</td>
-                  <td>{pedido.monto}</td>
-                  <td>
-                    <button className='botonProcesar' onClick={() => { entregarPedido(pedido) }}>
-                      <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }} />
-                    </button>
-                  </td>
-                  <td>
-                    <button className='botonEliminar' onClick={() => { deletePedido(pedido) }}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </td>
-                </tr>)
-            } return null;
-          })}
+      <div className="table-content">
+        {pedidosListos.map((pedido) => {
+          const [hora, minutos] = pedido.hora_listo.split(':');
+          const fechaActual = new Date();
+          fechaActual.setHours(hora);
+          fechaActual.setMinutes(minutos);
 
-        </tbody>
-      </Table>
+          const horaAMPM = fechaActual.toLocaleString('en-US', {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          });
+
+          return (
+            <div className="card_pedido" key={pedido.id}>
+              <div className="pedido-info">
+                <h3>Pedido #{pedido.id}</h3>
+                <p>
+                  <span>Cliente:</span>
+                  <span>{pedido.cliente}</span>
+                </p>
+                <p>
+                  <span>Mesa:</span>
+                  <span>{pedido.mesa}</span>
+                </p>
+                <p>
+                  <span>Listo desde:</span>
+                  <span>{horaAMPM}</span>
+                </p>
+                <p>
+                  <span>Total:</span>
+                  <span>${pedido.monto}</span>
+                </p>
+              </div>
+              
+              <div className="pedido-actions">
+                <button 
+                  className="btn-action btn-procesar"
+                  onClick={() => entregarPedido(pedido)}
+                >
+                  <FontAwesomeIcon icon={faCheck} />
+                  <span>Entregar</span>
+                </button>
+                <button 
+                  className="btn-action btn-eliminar"
+                  onClick={() => eliminarPedido(pedido)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                  <span>Eliminar</span>
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {pedidosListos.length === 0 && (
+          <div className="no-pedidos">
+            <p>No hay pedidos listos</p>
+          </div>
+        )}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default PedidosListos
+export default PedidosListos;

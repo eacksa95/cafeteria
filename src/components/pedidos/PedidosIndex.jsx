@@ -1,32 +1,26 @@
 import { Link } from "react-router-dom"
-
-//estilos
 import '../../estilos/Pedidos.css'
 
-//pedidos
-
-
-
 const PedidosIndex = ({ children }) => {
-
-    return (
-        <div className="Index">
-            <div className="titulo">
-                <h3>Pedidos:</h3>
-
-                <div className="nav">
-                    <span>
-                        <Link to="/pedidoslistos" className='indexLink'>Listos</Link> -
-                        <Link to="/pedidospendientes" className='indexLink'> Pendientes</Link>
-                    </span>
-                </div>
-            </div>
-
-            <div className="contenido">
-                {children}
-            </div>
+  return (
+    <div className="pedidos-container">
+      <div className="pedidos-header">
+        <h2 className="pedidos-title">Pedidos</h2>
+        <div className="pedidos-nav">
+          <Link to="/pedidoslistos" className="pedidos-link">
+            Pedidos Listos
+          </Link>
+          <Link to="/pedidospendientes" className="pedidos-link">
+            Pedidos Pendientes
+          </Link>
         </div>
-    )
+      </div>
+      
+      <div className="pedidos-content">
+        {children}
+      </div>
+    </div>
+  )
 }
 
 export default PedidosIndex
