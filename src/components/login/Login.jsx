@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import jwtDecode from 'jwt-decode';
+import { useLogin } from '../../api/queries';
 import '../../estilos/login.css';
 
 const Login = ({ onLogin }) => {
@@ -7,6 +8,8 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
+
+  const loginMutation = useLogin();
 
   useEffect(() => {
     if (mensaje) {
@@ -31,29 +34,12 @@ const Login = ({ onLogin }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/token/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Error en el login.");
-      }
-
-      const tokenData = await response.json();
-      
-      if (tokenData.error) {
-        setMensaje("Credenciales inválidas");
-        return;
-      }
-
-      window.localStorage.setItem("accessToken", JSON.stringify(tokenData.access));
-      onLogin(jwtDecode(tokenData.access).user_id);
-      
+      const data = await loginMutation.mutateAsync({ username, password });
+      window.localStorage.setItem("accessToken", JSON.stringify(data.access));
+      onLogin(jwtDecode(data.access).user_id);
     } catch (error) {
       console.error('Error:', error);
-      setMensaje("Error al iniciar sesión. Por favor intente nuevamente.");
+      setMensaje(error.message || "Error al iniciar sesión. Por favor intente nuevamente.");
     }
   };
 
@@ -66,7 +52,6 @@ const Login = ({ onLogin }) => {
       )}
 
       <form className="login-form" onSubmit={loginHandle}>
-
         <h2 className="login-title">Coffee Time</h2>
         <p className="text-center mb-4">Bienvenido a tu espacio de café</p>
         
@@ -94,8 +79,12 @@ const Login = ({ onLogin }) => {
           />
         </div>
 
-        <button type="submit" className="btn-primary">
-          Iniciar sesión
+        <button 
+          type="submit" 
+          className="btn-primary"
+          disabled={loginMutation.isLoading}
+        >
+          {loginMutation.isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
     </div>

@@ -1,3 +1,6 @@
+@import './variables.css';
+@import './common.css';
+
 /* Login styles */
 .login-container {
   min-height: 100vh;
@@ -43,6 +46,7 @@
 
 .form-input {
   width: 100%;
+  color: var(--text-primary);
   padding: var(--spacing-sm) var(--spacing-md);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-md);
