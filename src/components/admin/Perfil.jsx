@@ -3,7 +3,7 @@ import { Table } from "react-bootstrap"
 import { useNavigate } from 'react-router-dom';
 
 //estilos
-import '../../estilos/Admin.css'
+import '../../estilos/admin.css'
 
 //iconos FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
