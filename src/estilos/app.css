@@ -1,42 +1,8 @@
-.app-container {
+.app-wrapper {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--background-light);
+	background-color: var(--bg-primary); /*Fondo Blanco*/
 	width: 100%;
   }
   
-  /* Layout containers */
-  .container {
-	width: 100%;
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 var(--spacing-md);
-  }
-  
-  .page-container {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	padding: var(--spacing-md);
-  }
-
-  .content {
-	flex: 1;
-	padding: var(--spacing-md) 0;
-  }
-
-  .main-content {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-  }
-
-  
-  @media (max-width: 768px) {
-	.container {
-	  padding: 0 var(--spacing-sm);
-	}
-  }

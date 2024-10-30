@@ -1,84 +1,125 @@
-/* PedidosIndex*/
-.Index {
-    min-height: 70vh;
-    background-color: #f7d2ad !important;
+/* Admin Container */
+.admin-container {
+    flex: 1; 	
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-lg);
+    margin: 0;
+    min-height: calc(100vh - 180px);
 }
 
-.Index .titulo {
+.admin-header {
     display: flex;
-	flex-direction: row;
-	justify-content: start;
-	padding-left: 20px;
-    
+    flex-direction: row;
+	justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
 }
 
-.Index .titulo h3 {
-    display: flex;
-	flex-direction: row;
-	justify-content: start;
-	text-decoration: underline;
-    
+.admin-title {
+    color: var(--primary-dark);
+    font-size: var(--font-size-2xl);
+    margin: 0;
 }
 
-.Index .titulo .nav {
+.admin-nav {
     display: flex;
-	flex-direction: row;
-	justify-content: start;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.admin-nav-link {
+    display: flex;
     align-items: center;
-	padding-left: 20px;
-    font-weight: 400;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-secondary);
+    color: var(--primary-dark);
+    border-radius: var(--border-radius-md);
+    text-decoration: none;
+    transition: all var(--transition-normal);
 }
 
-.indexLink{
-    color: rgb(156, 94, 13) !important;
-    font-weight: 900;
+.admin-nav-link:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    transform: translateY(-2px);
 }
 
+.admin-icon {
+    font-size: var(--font-size-lg);
+}
+
+.admin-content {
+    flex: 1;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .admin-header {
+        align-items: stretch;
+    }
+
+    .admin-nav {
+        flex-direction: column;
+    }
+
+    .admin-nav-link {
+        justify-content: center;
+    }
+}
 
 /*contenedorTabla - titulo y tabla*/
 .contenedorTabla{
-	background-color: #f7d2ad !important;
-	padding: 5px 10px;
+    background-color: #f7d2ad !important;
+    padding: 5px 10px;
 }
 
 .contenedorTabla .titulo{
-	display: flex;
-	flex-direction: row;
-	justify-content: start;
-	padding-left: 20px;
-	text-decoration: underline;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    padding-left: 20px;
+    text-decoration: underline;
 }
 
 .Tabla{
-	justify-content: center;
+    justify-content: center;
 }
 
 .Tabla thead tr {
-	background-color: rgb(247, 177, 130);
-	justify-content: center;
-	align-items: center;
+    background-color: rgb(247, 177, 130);
+    justify-content: center;
+    align-items: center;
 }
 
 .Tabla tbody{
-	background-color: rgb(252, 204, 171);
+    background-color: rgb(252, 204, 171);
 }
 
 .Tabla tbody tr {
-	justify-content: center;
-	align-items: center;
+    justify-content: center;
+    align-items: center;
 }
 
-
 .Tabla tbody tr td .botonProcesar {
-	border: none;
-	background-color: transparent;
-	color: green;
-	cursor: pointer;
+    border: none;
+    background-color: transparent;
+    color: green;
+    cursor: pointer;
 }
 
 .Tabla tbody tr td .botonEliminar {
-	border: none;
-	background-color: transparent;
-	color: red;
-	cursor: pointer;
+    border: none;
+    background-color: transparent;
+    color: red;
+    cursor: pointer;
 }

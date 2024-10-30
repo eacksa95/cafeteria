@@ -1,16 +1,16 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
-
-// Configura la URL base del API
+// Configure base API URL
 const API_URL = 'http://localhost:8000';
 //const API_URL = 'https://be-cafeteria.onrender.com';
 
-const fetchWithAuth = async (url) => {
+const fetchWithAuth = async (url, options = {}) => {
   const response = await fetch(`${API_URL}${url}`, {
-    method: 'GET',
+    ...options,
     headers: {
       Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
       'Content-Type': 'application/json',
+      ...options.headers,
     },
   });
   
@@ -60,12 +60,65 @@ export const useProductos = () => {
   });
 };
 
+export const useProducto = (id) => {
+  return useQuery({
+    queryKey: ['productos', id],
+    queryFn: () => fetchWithAuth(`/productos/${id}/`),
+    enabled: !!id,
+  });
+};
+
+export const useCreateProducto = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (producto) => 
+      fetchWithAuth('/productos/', {
+        method: 'POST',
+        body: JSON.stringify(producto),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['productos']);
+    },
+  });
+};
+
+export const useUpdateProducto = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, ...producto }) => 
+      fetchWithAuth(`/productos/${id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(producto),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['productos']);
+    },
+  });
+};
+
+export const useDeleteProducto = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id) => 
+      fetchWithAuth(`/productos/${id}/`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['productos']);
+    },
+  });
+};
+
 export const usePedidos = () => {
   return useQuery({
     queryKey: ['pedidos'],
     queryFn: () => fetchWithAuth('/pedidos/'),
     staleTime: 1 * 60 * 1000,
     cacheTime: 5 * 60 * 1000,
-    refetchInterval: 30 * 1000,
+    refetchInterval: 10 * 1000,
   });
 };
+

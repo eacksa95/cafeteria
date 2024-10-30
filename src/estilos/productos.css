@@ -18,7 +18,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-md);
   border-bottom: 2px solid var(--border-color);
 }
@@ -35,24 +35,27 @@
 }
 
 .productos-link {
-  color: var(--primary-color);
+  color: var(--primary-dark);
   text-decoration: none;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--border-radius-sm);
   transition: all var(--transition-normal);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .productos-link:hover {
-  background-color: var(--secondary-light);
+  background-color: var(--secondary-color);
   color: var(--primary-dark);
 }
 
-.productos-content {
+.productos-content { /*Contenedor de los  children de ProductosIndex*/
     flex: 1;
     display: flex;
     flex-direction: column;
   }
+
+
+
 
 /* ProductosTabla styles */
 .productos-table-container {
@@ -62,28 +65,31 @@
     background-color: var(--bg-primary);
     border-radius: var(--border-radius-md);
     overflow: hidden;
-    max-height: calc(100vh - 300px); /* Altura máxima restando espacio para header y footer */
+    max-height: calc(100vh - 250px); /* Altura máxima restando espacio para header y footer */
   }
 
-.table-header {
+.productos-table-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   background-color: var(--primary-color);
   color: var(--text-light);
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  margin-bottom: var(--spacing-md);
   padding: var(--spacing-md);
   position: sticky;
   top: 0;
   z-index: 1;
 }
 
-.table-header h4 {
+.productos-table-header h4 { /*Titulo secundario*/
   margin: 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
 }
+
 /*Wrapper de la tabla*/
-.table-wrapper {
+.productos-table-wrapper {
     overflow-y: auto;
     /* Estilizar la barra de scroll */
     scrollbar-width: thin;
@@ -91,16 +97,16 @@
   }
   
   /* Estilos para la barra de scroll en navegadores webkit */
-  .table-wrapper::-webkit-scrollbar {
-    width: 8px;
+  .productos-table-wrapper::-webkit-scrollbar {
+    width:8px;
   }
   
-  .table-wrapper::-webkit-scrollbar-track {
+  .productos-table-wrapper::-webkit-scrollbar-track {
     background: var(--bg-secondary);
     border-radius: 4px;
   }
   
-  .table-wrapper::-webkit-scrollbar-thumb {
+  .productos-table-wrapper::-webkit-scrollbar-thumb {
     background-color: var(--primary-color);
     border-radius: 4px;
     border: 2px solid var(--bg-secondary);
@@ -130,6 +136,7 @@
 .productos-table td {
   padding: var(--spacing-sm) var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
+  color: var(--primary-dark);
 }
 
 .productos-table tr:hover {
@@ -169,6 +176,11 @@
 }
 
 .precio-column {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.nombre-column {
   font-weight: 600;
   color: var(--primary-dark);
 }

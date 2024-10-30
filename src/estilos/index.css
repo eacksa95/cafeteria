@@ -1,3 +1,10 @@
+/* Reset y estilos base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -10,19 +17,30 @@
   -webkit-text-size-adjust: 100%;
 }
 
-body {
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html, body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  height: 100%;
+  width: 100%;
   background-color: var(--background-light);
   color: var(--text-dark);
+  overflow-x: hidden;
 }
 
-/* Reset básico */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+body {
+  font-family: var(--font-family);
+  /*background-color: var(--bg-secondary);*/
+  /*color: var(--text-primary);*/
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {

@@ -11,7 +11,7 @@
   box-shadow: var(--shadow-md);
   padding: var(--spacing-lg);
   margin: 0;
-  min-height: calc(100vh - 180px);
+  min-height: calc(100vh - 180px); /* Altura del viewport menos navbar y footer */
 }
 
 .pedidos-header {
@@ -55,20 +55,21 @@
 }
 
 /* Contenedor de la tabla */
-.contenedorTabla {
-  background-color: var(--bg-primary);
+.pedidos-tabla {
+  background-color: var(--bg-secondary);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   margin-bottom: var(--spacing-md);
 }
 
 /* Título de la tabla */
-.table-header {
+.pedidos-table-header {
   background-color: var(--primary-color);
   color: var(--text-light);
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
   margin-bottom: var(--spacing-md);
+  position: sticky;
 }
 
 .table-header h4 {
@@ -171,37 +172,6 @@
   filter: brightness(90%);
 }
 
-/* Estados de carga y error */
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.loading-container svg,
-.error-container svg {
-  font-size: var(--font-size-3xl);
-  margin-bottom: var(--spacing-md);
-  color: var(--primary-color);
-}
-
-.loading-container svg {
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 /* No hay pedidos */
 .no-pedidos {

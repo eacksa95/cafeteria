@@ -11,7 +11,7 @@ export const Foo = () => {
 
   return (
     <>
-      <footer className="main-footer">
+      <footer className="footer-container">
         <div className="footer-content">
           <button onClick={() => setShowAbout(true)} className="footer-link">
             <FontAwesomeIcon icon={faInfoCircle} className="footer-icon" />

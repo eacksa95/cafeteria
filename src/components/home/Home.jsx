@@ -53,7 +53,7 @@ const Home = ({ onLogout, userId }) => {
   }, [mensaje]);
 
   return (
-    <div className="app-wrapper">
+    <div className="home-container">
       <BrowserRouter>
         <Navbar onLogout={onLogout} />
 
@@ -152,9 +152,7 @@ const Home = ({ onLogout, userId }) => {
         </main>
 
         <footer className="footer">
-        <div className="container">
         <Foo />
-        </div>
         </footer>
       </BrowserRouter>
     </div>

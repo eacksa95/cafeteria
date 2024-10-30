@@ -9,8 +9,8 @@ const PedidosPendientes = ({ setMensaje }) => {
 
   if (isLoading) {
     return (
-      <div className="contenedorTabla">
-        <div className="table-header">
+      <div className="pedidos-tabla">
+        <div className="pedidos-table-header">
           <h4>Pedidos Pendientes</h4>
         </div>
         <div className="loading-container">
@@ -23,8 +23,8 @@ const PedidosPendientes = ({ setMensaje }) => {
 
   if (error) {
     return (
-      <div className="contenedorTabla">
-        <div className="table-header">
+      <div className="pedidos-tabla">
+        <div className="pedidos-table-header">
           <h4>Pedidos Pendientes</h4>
         </div>
         <div className="error-container">
@@ -89,8 +89,8 @@ const PedidosPendientes = ({ setMensaje }) => {
   const pedidosPendientes = pedidos?.filter(pedido => pedido.estado === "pendiente") || [];
 
   return (
-    <div className="contenedorTabla">
-      <div className="table-header">
+    <div className="pedidos-tabla">
+      <div className="pedidos-table-header">
         <h4>Pedidos Pendientes</h4>
       </div>
 

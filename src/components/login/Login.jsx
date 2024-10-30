@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import jwtDecode from 'jwt-decode';
 import { useLogin } from '../../api/queries';
 import '../../estilos/login.css';
@@ -52,37 +54,43 @@ const Login = ({ onLogin }) => {
 
       <form className="login-form" onSubmit={loginHandle}>
         <h2 className="login-title">Coffee Time</h2>
-        <p className="text-center mb-4">Bienvenido a tu espacio de café</p>
+        <p className="login-text-center">Bienvenido a tu espacio de café</p>
         
         <div className="form-group">
-          <input
-            className="form-input"
-            aria-label="Username"
-            placeholder="Nombre de usuario"
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={loginMutation.isLoading}
-          />
+          <div className="input-wrapper">
+            <FontAwesomeIcon icon={faUser} className="input-icon" />
+            <input
+              className="form-input"
+              aria-label="Username"
+              placeholder="Nombre de usuario"
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={loginMutation.isLoading}
+            />
+          </div>
         </div>
 
         <div className="form-group">
-          <input
-            className="form-input"
-            aria-label="Password"
-            placeholder="Contraseña"
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loginMutation.isLoading}
-          />
+          <div className="input-wrapper">
+            <FontAwesomeIcon icon={faLock} className="input-icon" />
+            <input
+              className="form-input"
+              aria-label="Password"
+              placeholder="Contraseña"
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loginMutation.isLoading}
+            />
+          </div>
         </div>
 
         <button 
           type="submit" 
-          className="btn-primary"
+          className="btn-login"
           disabled={loginMutation.isLoading}
         >
           {loginMutation.isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}

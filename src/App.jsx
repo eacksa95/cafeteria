@@ -34,7 +34,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-wrapper">
       {userId ? (
         <Home onLogout={onLogoutHandler} userId={userId} />
       ) : (

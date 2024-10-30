@@ -9,8 +9,8 @@ const PedidosListos = ({ setMensaje }) => {
 
   if (isLoading) {
     return (
-      <div className="contenedorTabla">
-        <div className="table-header">
+      <div className="pedidos-tabla">
+        <div className="pedidos-table-header">
           <h4>Pedidos Listos</h4>
         </div>
         <div className="loading-container">
@@ -23,8 +23,8 @@ const PedidosListos = ({ setMensaje }) => {
 
   if (error) {
     return (
-      <div className="contenedorTabla">
-        <div className="table-header">
+      <div className="pedidos-tabla">
+        <div className="pedidos-table-header">
           <h4>Pedidos Listos</h4>
         </div>
         <div className="error-container">
@@ -89,8 +89,8 @@ const PedidosListos = ({ setMensaje }) => {
   const pedidosListos = pedidos?.filter(pedido => pedido.estado === "listo") || [];
 
   return (
-    <div className="contenedorTabla">
-      <div className="table-header">
+    <div className="pedidos-tabla">
+      <div className="pedidos-table-header">
         <h4>Pedidos Listos</h4>
       </div>
 

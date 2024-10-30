@@ -46,7 +46,7 @@ const ProductosTabla = ({ setMensaje }) => {
   if (isLoading) {
     return (
       <div className="productos-table-container">
-        <div className="table-header">
+        <div className="productos-table-header">
           <h4>Lista de Productos</h4>
         </div>
         <div className="loading-container">
@@ -60,7 +60,7 @@ const ProductosTabla = ({ setMensaje }) => {
   if (error) {
     return (
       <div className="productos-table-container">
-        <div className="table-header">
+        <div className="productos-table-header">
           <h4>Lista de Productos</h4>
         </div>
         <div className="error-container">
@@ -73,7 +73,7 @@ const ProductosTabla = ({ setMensaje }) => {
 
   return (
     <div className="productos-table-container">
-      <div className="table-header">
+      <div className="productos-table-header">
         <h4>Lista de Productos</h4>
         <div className="search-container">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
@@ -87,8 +87,8 @@ const ProductosTabla = ({ setMensaje }) => {
         </div>
       </div>
       
-      <div className="table-wrapper">
-        <table className="productos-table">
+      <div className="productos-table-wrapper">
+        <table className="productos-table"> 
           <thead>
             <tr>
               <th>#</th>
@@ -101,7 +101,7 @@ const ProductosTabla = ({ setMensaje }) => {
             {filteredProducts.map((producto) => (
               <tr key={producto.id}>
                 <td>{producto.id}</td>
-                <td>{producto.nombre}</td>
+                <td className="nombre-column">{producto.nombre}</td>
                 <td className="precio-column">
                   ${Number(producto.precio).toFixed(2)}
                 </td>

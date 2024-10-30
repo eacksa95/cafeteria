@@ -1,4 +1,4 @@
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {}*/
     :root {
         /* Paleta de colores principal */
         --primary-color: #904E2A;     /* Café oscuro */
@@ -58,4 +58,4 @@
         --transition-fast: 150ms ease;
         --transition-normal: 300ms ease;
         --transition-slow: 500ms ease;
-      }}
+      }

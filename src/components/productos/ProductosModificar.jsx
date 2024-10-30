@@ -1,91 +1,151 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImage, faCoffee, faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import { useProducto, useUpdateProducto } from '../../api/queries';
 
 const ProductosModificar = ({ setMensaje }) => {
-    const [producto, setProducto] = useState([])
-    const [productos, setProductos] = useState([])
-    const [id, setId] = useState() //id producto nuevo
-    const [nombre, setNombre] = useState('')
-    const [precio, setPrecio] = useState('')
-    const [cantidad, setCantidad] = useState(1)
-    const [img, setImg] = useState('https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg')
-    const [actualizar, setActualizar] = useState(false) //Actualizar estado para limpiar formulario
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data: producto, isLoading, error, refetch } = useProducto(id);
+  const updateMutation = useUpdateProducto();
+  console.log("actualizar datos")
+  const [formData, setFormData] = useState({
+    nombre: '',
+    precio: '',
+    cantidad: 1,
+    img: 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg'
+  });
 
-
-    //Modificar Producto PUT
-    const onModificarProducto = (e) => {
-        e.preventDefault()
-        try {
-            fetch('http://localhost:8000/productos/', {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id,
-                    nombre,
-                    precio,
-                    cantidad,
-                    img
-                }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setProducto(data)
-                    setMensaje("Guardando Cambios")
-                    setActualizar(!actualizar)
-                }
-                )
-        } catch (e) { console.log("error onNuevoPedido:", e) }
+  useEffect(() => {
+    if (producto) {
+      setFormData({
+        nombre: producto.nombre || '',
+        precio: producto.precio || '',
+        cantidad: producto.cantidad || 1,
+        img: producto.img || 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg'
+      });
     }
+  }, [producto]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await updateMutation.mutateAsync({
+        id,
+        ...formData
+      });
+      
+      setMensaje("Producto actualizado exitosamente");
+      navigate('/productosindex');
+    } catch (error) {
+      setMensaje('Error al actualizar el producto');
+      console.error('Error updating product:', error);
+    }
+  };
+
+  if (isLoading) {
     return (
-        <div className="contenedorForm">
-            <div className="titulo">
-                <h3>Modificar Producto</h3>
-            </div>
-            <form onSubmit={onModificarProducto}>
-                <p>Id del producto a modificar</p>
-                <input
-                    aria-label="Id"
-                    placeholder="Id del Producto"
-                    id="id"
-                    type="text"
-                    onChange={(e) => {
-                        setId(e.target.value)
-                    }}
-                />
-                <input
-                    aria-label="ProductName"
-                    placeholder="Nombre del Producto"
-                    id="name"
-                    type="text"
-                    onChange={(e) => {
-                        setNombre(e.target.value)
-                    }}
-                />
-                <input
-                    aria-label="Precio"
-                    placeholder="Precio"
-                    id="precio"
-                    type="number"
-                    onChange={(e) => {
-                        setPrecio(e.target.value)
-                    }}
-                />
-                <input
-                    aria-label="Imgen"
-                    placeholder="URI - Imagen del producto"
-                    id="img"
-                    type="text"
-                    onChange={(e) => {
-                        setImg(e.target.value)
-                    }}
-                />
-                <button type="submit">Guardar</button>
-            </form>
+      <div className="loading-container">
+        <FontAwesomeIcon icon={faCoffee} spin />
+        <p>Cargando producto...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Error al cargar el producto: {error.message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="producto-nuevo-container">
+      <div className="producto-nuevo-form-header">
+        <h3>Modificar Producto</h3>
+        <p>Actualizar datos del producto</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="producto-nuevo-form">
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faCoffee} className="icon" />
+            <input
+              className="form-input"
+              name="nombre"
+              placeholder="Nombre del Producto"
+              type="text"
+              value={formData.nombre}
+              onChange={handleChange}
+              required
+            />
+          </div>
         </div>
-    )
-}
-export default ProductosModificar
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faDollarSign} className="icon" />
+            <input
+              className="form-input"
+              name="precio"
+              placeholder="Precio"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.precio}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faImage} className="icon" />
+            <input
+              className="form-input"
+              name="img"
+              placeholder="URL de la imagen"
+              type="text"
+              value={formData.img}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {formData.img && (
+          <div className="image-preview">
+            <img 
+              src={formData.img} 
+              alt="Vista previa"
+              onError={(e) => {
+                e.target.src = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
+              }}
+            />
+          </div>
+        )}
+
+        <button 
+          type="submit" 
+          className="btn-submit"
+          disabled={updateMutation.isLoading}
+        >
+          {updateMutation.isLoading ? 'Actualizando...' : 'Guardar Cambios'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default ProductosModificar;
