@@ -1,174 +1,163 @@
-import { useState, useEffect } from "react"
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faEnvelope, faLock, faUserTag } from '@fortawesome/free-solid-svg-icons';
+import { useCreateUser } from '../../api/queries';
 
 const UsuariosNuevo = ({ setMensaje }) => {
-    const [usuario, setUsuario] = useState([])
-    const [usuarios, setUsuarios] = useState([])
-    const [id, setId] = useState() //id producto nuevo
-    const [password, setPassword] = useState('')
-    const [username, setUsername] = useState('')
-    const [first_name, setFirst_name] = useState('')
-    const [last_name, setLast_name] = useState('')
-    const [email, setEmail] = useState('')
-    const [group_name, setGroup_name] = useState('')
+  const navigate = useNavigate();
+  const createUser = useCreateUser();
+  
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    email: '',
+    group_name: 'recepcionista'
+  });
 
-    const [actualizar, setActualizar] = useState(false) //Actualizar estado para limpiar formulario
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-    //usuarios[]
-    useEffect(() => {
-        try {
-            fetch('http://localhost:8000/users', {
-                method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-                headers: {
-                    Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setUsuarios(data);
-                });
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    //usuarios[actualizar]
-    useEffect(() => {
-        try {
-            fetch('http://localhost:8000/users', {
-                method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-                headers: {
-                    Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setUsuarios(data);
-                });
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }, [actualizar]);
-
-
-    // Actualizar id para usuario Nuevo.
-    useEffect(() => { obtenerIdMasAlto(); }, [usuarios]);
-
-    //obtener id para usuario nuevo
-    const obtenerIdMasAlto = () => {
-        const idMasAlto = usuarios.reduce((maxId, usuario) => {
-            return usuario.id > maxId ? usuario.id : maxId;
-        }, 0);
-        setId(idMasAlto + 1);
-    };
-
-
-    //Nuevo usuario POST
-    const onNuevoUsuario = (e) => {
-        e.preventDefault()
-        const last_login = null;
-        const is_superuser = null;
-        const is_staff = true;
-        const is_active = true;
-        const date = new Date();
-        const date_joined = date.toISOString();
-        const group_name = "recepcionista"
-        try {
-            fetch('http://localhost:8000/users/', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id,
-                    username,
-                    email,
-                    first_name,
-                    last_name,
-                    group_name,
-                    password,
-
-                }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setUsuario(data)
-                    setMensaje("Usuario Nuevo Registrado")
-                    setActualizar(!actualizar)
-                }
-                )
-        } catch (e) { console.log("error onNuevoUsuario:", e) }
+    if (!formData.username.trim()) {
+      setMensaje("Por favor ingrese un nombre de usuario");
+      return;
+    }
+    if (!formData.password.trim()) {
+      setMensaje("Por favor ingrese una contraseña");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setMensaje("Por favor ingrese un email");
+      return;
     }
 
+    try {
+      await createUser.mutateAsync(formData);
+      setMensaje("Usuario creado exitosamente");
+      navigate('/usuariostabla');
+    } catch (error) {
+      console.error("Error:", error);
+      setMensaje("Error al crear el usuario");
+    }
+  };
 
-    return (
-        <div className="contenedorForm">
-          <div className="titulo">
-            <h3>Nuevo Usuario</h3>
+  return (
+    <div className="usuario-nuevo-container">
+      <div className="usuario-form-header">
+        <h2>Nuevo Usuario</h2>
+        <p>Complete los datos del nuevo usuario</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="usuario-form">
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <input
+              className="form-input"
+              name="username"
+              placeholder="Nombre de usuario"
+              type="text"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <form onSubmit={onNuevoUsuario}>
-            <p>Cargar datos del nuevo Usuario</p>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faLock} className="icon" />
             <input
-              aria-label="UserName"
-              placeholder="Nick de Usuario"
-              id="username"
-              type="text"
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
-            <input
-              aria-label="Nombre"
-              placeholder="Nombre"
-              id="first_name"
-              type="text"
-              onChange={(e) => {
-                setFirst_name(e.target.value);
-              }}
-            />
-            <input
-              aria-label="Apellido"
-              placeholder="Apellido"
-              id="last_name"
-              type="text"
-              onChange={(e) => {
-                setLast_name(e.target.value);
-              }}
-            />
-            <input
-              aria-label="email"
-              placeholder="E-mail"
-              id="email"
-              type="text"
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            />
-            <input
-              aria-label="password"
-              placeholder="Clave de acceso"
-              id="password"
+              className="form-input"
+              name="password"
+              placeholder="Contraseña"
               type="password"
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <input
+              className="form-input"
+              name="first_name"
+              placeholder="Nombre"
+              type="text"
+              value={formData.first_name}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <input
+              className="form-input"
+              name="last_name"
+              placeholder="Apellido"
+              type="text"
+              value={formData.last_name}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faEnvelope} className="icon" />
+            <input
+              className="form-input"
+              name="email"
+              placeholder="Email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="input-icon">
+            <FontAwesomeIcon icon={faUserTag} className="icon" />
             <select
-              id="group_name"
-              onChange={(e) => {
-                setGroup_name(e.target.value);
-              }}
+              className="form-input"
+              name="group_name"
+              value={formData.group_name}
+              onChange={handleChange}
             >
-              <option value="admin">Admin</option>
+              <option value="admin">Administrador</option>
               <option value="recepcionista">Recepcionista</option>
               <option value="cocinero">Cocinero</option>
             </select>
-            <button type="submit">Registrar</button>
-          </form>
+          </div>
         </div>
-      );
-      
-}
-export default UsuariosNuevo
+
+        <button 
+          type="submit" 
+          className="btn-submit"
+          disabled={createUser.isLoading}
+        >
+          {createUser.isLoading ? 'Creando usuario...' : 'Crear Usuario'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default UsuariosNuevo;

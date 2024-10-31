@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Configure base API URL
-const API_URL = 'http://localhost:8000';
-//const API_URL = 'https://be-cafeteria.onrender.com';
+//const API_URL = 'http://localhost:8000';
+const API_URL = 'https://be-cafeteria.onrender.com';
 
 const fetchWithAuth = async (url, options = {}) => {
   const response = await fetch(`${API_URL}${url}`, {
@@ -20,6 +20,8 @@ const fetchWithAuth = async (url, options = {}) => {
   
   return response.json();
 };
+
+/*LOGIN QUERY*/
 
 export const useLogin = () => {
   return useMutation({
@@ -49,6 +51,73 @@ export const useLogin = () => {
     },
   });
 };
+
+/* USER QUERIES */
+export const useUser = (userId) => {
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetchWithAuth(`/users/${userId}/`),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+  });
+};
+
+export const useUsers = () => {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchWithAuth('/users/'),
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
+  });
+};
+
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (user) => 
+      fetchWithAuth('/users/', {
+        method: 'POST',
+        body: JSON.stringify(user),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+    },
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, ...user }) => 
+      fetchWithAuth(`/users/${id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(user),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+    },
+  });
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id) => 
+      fetchWithAuth(`/users/${id}/`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+    },
+  });
+};
+
+
+/*PRODUCTOS QUERIES */
 
 export const useProductos = () => {
   return useQuery({
@@ -112,6 +181,8 @@ export const useDeleteProducto = () => {
   });
 };
 
+/* PEDIDOS QUERIES */
+
 export const usePedidos = () => {
   return useQuery({
     queryKey: ['pedidos'],
@@ -122,3 +193,55 @@ export const usePedidos = () => {
   });
 };
 
+
+export const usePedido = (id) => {
+  return useQuery({
+    queryKey: ['pedidos', id],
+    queryFn: () => fetchWithAuth(`/pedidos/${id}/`),
+    enabled: !!id,
+  });
+};
+
+export const useCreatePedido = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (pedido) => 
+      fetchWithAuth('/pedidos/', {
+        method: 'POST',
+        body: JSON.stringify(pedido),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['pedidos']);
+    },
+  });
+};
+
+export const useUpdatePedido = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, ...pedidos }) => 
+      fetchWithAuth(`/pedidos/${id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(pedido),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['pedidos']);
+    },
+  });
+};
+
+export const useDeletePedido = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id) => 
+      fetchWithAuth(`/pedidos/${id}/`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['pedidos']);
+    },
+  });
+};

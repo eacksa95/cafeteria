@@ -6,7 +6,7 @@ import { useCreateProducto } from '../../api/queries';
 
 const ProductosNuevo = ({ setMensaje }) => {
   const navigate = useNavigate();
-  const createMutation = useCreateProducto();
+  const createProducto = useCreateProducto();
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -36,7 +36,7 @@ const ProductosNuevo = ({ setMensaje }) => {
     }
 
     try {
-      await createMutation.mutateAsync(formData);
+      await createProducto.mutateAsync(formData);
       setMensaje("Producto registrado exitosamente");
       navigate('/productosindex');
     } catch (error) {

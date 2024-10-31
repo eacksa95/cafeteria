@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+//Origen de los Datos QUERY
+import { useUser } from '../../api/queries';
+//estilos
 import '../../estilos/home.css';
-
+//componentes de Home
 import Navbar from './Navbar';
 import { Foo } from './Foo';
 import DropdownMenu from './DropdownMenu';
 import { ProtectedRoute } from '../ProtectedRoute';
-
+//componentes de rutas
 import { Inicio } from './Inicio';
 import NoAuth from '../info/NoAuth';
 import AdminIndex from '../admin/AdminIndex';
@@ -23,24 +26,15 @@ import ProductosNuevo from '../productos/ProductosNuevo';
 import ProductosModificar from '../productos/ProductosModificar';
 import UsuariosTabla from '../admin/UsuariosTabla';
 
+/**Componente principal de la aplicacion
+ * Desde aqui se pueden acceder a todas las rutas
+*/
 const Home = ({ onLogout, userId }) => {
-  const [user, setUser] = useState();
+  const { data: user, isLoading } = useUser(userId);
   const [mensaje, setMensaje] = useState('');
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
   
   const role = user?.group_name;
-
-  useEffect(() => {
-    fetch(`http://localhost:8000/users/${userId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then(setUser);
-  }, [userId]);
 
   useEffect(() => {
     if (mensaje) {
@@ -51,6 +45,10 @@ const Home = ({ onLogout, userId }) => {
       }, 3000);
     }
   }, [mensaje]);
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <div className="home-container">

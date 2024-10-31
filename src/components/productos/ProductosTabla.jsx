@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPaintBrush, faCoffee, faSearch, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { useProductos } from '../../api/queries';
+import { useProductos, useDeleteProducto } from '../../api/queries';
 
 const ProductosTabla = ({ setMensaje }) => {
-  const [actualizar, setActualizar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { data: productos, isLoading, error } = useProductos();
+  const deleteProducto = useDeleteProducto();
   const navigate = useNavigate();
 
   const onModificarProducto = (producto) => {
@@ -20,19 +20,8 @@ const ProductosTabla = ({ setMensaje }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/productos/${producto.id}/`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`
-        },
-      });
-
-      if (response.ok) {
-        setMensaje("Producto eliminado exitosamente");
-        setActualizar(!actualizar);
-      } else {
-        throw new Error('Error al eliminar el producto');
-      }
+      await deleteProducto.mutateAsync(producto.id);
+      setMensaje("Producto eliminado exitosamente");
     } catch (error) {
       console.error("Error deleting product:", error);
       setMensaje("Error al eliminar el producto");
@@ -88,7 +77,7 @@ const ProductosTabla = ({ setMensaje }) => {
       </div>
       
       <div className="productos-table-wrapper">
-        <table className="productos-table"> 
+        <table className="productos-table">
           <thead>
             <tr>
               <th>#</th>
@@ -111,6 +100,7 @@ const ProductosTabla = ({ setMensaje }) => {
                       className="btn-edit"
                       onClick={() => onModificarProducto(producto)}
                       title="Editar producto"
+                      disabled={deleteProducto.isLoading}
                     >
                       <FontAwesomeIcon icon={faPaintBrush} />
                     </button>
@@ -118,6 +108,7 @@ const ProductosTabla = ({ setMensaje }) => {
                       className="btn-delete"
                       onClick={() => onDeleteProducto(producto)}
                       title="Eliminar producto"
+                      disabled={deleteProducto.isLoading}
                     >
                       <FontAwesomeIcon icon={faTrash} />
                     </button>

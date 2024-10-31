@@ -1,75 +1,83 @@
-import { useEffect, useState } from "react"
-import { Table } from "react-bootstrap"
-import { useNavigate } from 'react-router-dom';
-
-//estilos
-import '../../estilos/admin.css'
-
-//iconos FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faPaintBrush } from '@fortawesome/free-solid-svg-icons';
-
+import { faPaintBrush, faUser } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../api/queries';
 
 const Perfil = ({ userId }) => {
-    const [user, setUser] = useState([])
-    const navigate = useNavigate();
+  const { data: user, isLoading, error } = useUser(userId);
+  const navigate = useNavigate();
 
-    // datos de usuario
-    useEffect(() => {
-        fetch('http://localhost:8000/users/' + userId, {
-            method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-            headers: {
-                Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((res) => res.json())
-            .then((userData) => {
-                setUser(userData)
-            })
-    }, [])
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <FontAwesomeIcon icon={faUser} spin />
+        <p>Cargando perfil...</p>
+      </div>
+    );
+  }
 
-    const onModificarUsuario = (user) => {
-        navigate(`/usuariosmodificar/${user.id}`);
-    }
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Error al cargar el perfil: {error.message}</p>
+      </div>
+    );
+  }
 
+  const onModificarUsuario = () => {
+    navigate(`/usuariosmodificar/${user.id}`);
+  };
 
+  return (
+    <div className="perfil-container">
+      <div className="perfil-header">
+        <h2 className="perfil-title">Mi Perfil</h2>
+      </div>
 
-    return (<>
-        <div className="contenedorTabla">
-            <div className="titulo">
-                Datos del Usuario
+      <div className="perfil-content">
+        <div className="perfil-card">
+          <div className="perfil-avatar">
+            <FontAwesomeIcon icon={faUser} className="avatar-icon" />
+          </div>
+          
+          <div className="perfil-info">
+            <div className="info-group">
+              <label>Usuario:</label>
+              <span>{user.username}</span>
             </div>
-            <Table striped bordered hover className='Tabla'>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Usuario</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>E-mail</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr key={user.id}>
-                        <td>{user.id}</td>
-                        <td>{user.username}</td>
-                        <td>{user.first_name}</td>
-                        <td> {user.last_name}</td>
-                        <td>{user.email}</td>
-                        <td>
-                            <button className='botonProcesar' onClick={() => { onModificarUsuario(user) }}>
-                                <FontAwesomeIcon icon={faPaintBrush} />
-                            </button>
-                        </td>
+            
+            <div className="info-group">
+              <label>Nombre:</label>
+              <span>{user.first_name}</span>
+            </div>
+            
+            <div className="info-group">
+              <label>Apellido:</label>
+              <span>{user.last_name}</span>
+            </div>
+            
+            <div className="info-group">
+              <label>Email:</label>
+              <span>{user.email}</span>
+            </div>
+            
+            <div className="info-group">
+              <label>Rol:</label>
+              <span>{user.group_name}</span>
+            </div>
+          </div>
 
-                    </tr>
-                </tbody>
-            </Table>
+          <button 
+            className="btn-edit-profile"
+            onClick={onModificarUsuario}
+          >
+            <FontAwesomeIcon icon={faPaintBrush} />
+            <span>Editar Perfil</span>
+          </button>
         </div>
-    </>)
-}
+      </div>
+    </div>
+  );
+};
 
-export default Perfil
+export default Perfil;

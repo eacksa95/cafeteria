@@ -1,11 +1,44 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faCheck, faCoffee, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { usePedidos } from '../../api/queries';
+import { usePedidos, useUpdatePedido, useDeletePedido } from '../../api/queries';
 
 const PedidosListos = ({ setMensaje }) => {
   const { data: pedidos, isLoading, error } = usePedidos();
-  const [actualizar, setActualizar] = useState(false);
+  const updatePedido = useUpdatePedido();
+  const deletePedido = useDeletePedido();
+
+  const entregarPedido = async (pedido) => {
+    const currentDate = new Date();
+    const hora_entregado = currentDate.toLocaleTimeString([], { hour12: false });
+    
+    try {
+      await updatePedido.mutateAsync({
+        ...pedido,
+        estado: "entregado",
+        hora_entregado
+      });
+      
+      setMensaje("Pedido entregado correctamente");
+    } catch (error) {
+      console.error('Error al entregar el pedido:', error);
+      setMensaje("Error al entregar el pedido");
+    }
+  };
+
+  const eliminarPedido = async (pedido) => {
+    if (!window.confirm('¿Está seguro que desea eliminar este pedido?')) {
+      return;
+    }
+
+    try {
+      await deletePedido.mutateAsync(pedido.id);
+      setMensaje("Pedido eliminado correctamente");
+    } catch (error) {
+      console.error('Error al eliminar el pedido:', error);
+      setMensaje("Error al eliminar el pedido");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -34,57 +67,6 @@ const PedidosListos = ({ setMensaje }) => {
       </div>
     );
   }
-
-  const entregarPedido = async (pedido) => {
-    const currentDate = new Date();
-    const hora_entregado = currentDate.toLocaleTimeString([], { hour12: false });
-    
-    try {
-      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...pedido,
-          estado: "entregado",
-          hora_entregado
-        }),
-      });
-      
-      if (response.ok) {
-        setMensaje("Pedido entregado correctamente");
-        setActualizar(!actualizar);
-      }
-    } catch (error) {
-      console.error('Error al entregar el pedido:', error);
-      setMensaje("Error al entregar el pedido");
-    }
-  };
-
-  const eliminarPedido = async (pedido) => {
-    if (!window.confirm('¿Está seguro que desea eliminar este pedido?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8000/pedidos/${pedido.id}/`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-        }
-      });
-      
-      if (response.ok) {
-        setMensaje("Pedido eliminado correctamente");
-        setActualizar(!actualizar);
-      }
-    } catch (error) {
-      console.error('Error al eliminar el pedido:', error);
-      setMensaje("Error al eliminar el pedido");
-    }
-  };
 
   const pedidosListos = pedidos?.filter(pedido => pedido.estado === "listo") || [];
 
@@ -133,6 +115,7 @@ const PedidosListos = ({ setMensaje }) => {
                 <button 
                   className="btn-action btn-procesar"
                   onClick={() => entregarPedido(pedido)}
+                  disabled={updatePedido.isLoading || deletePedido.isLoading}
                 >
                   <FontAwesomeIcon icon={faCheck} />
                   <span>Entregar</span>
@@ -140,6 +123,7 @@ const PedidosListos = ({ setMensaje }) => {
                 <button 
                   className="btn-action btn-eliminar"
                   onClick={() => eliminarPedido(pedido)}
+                  disabled={updatePedido.isLoading || deletePedido.isLoading}
                 >
                   <FontAwesomeIcon icon={faTrash} />
                   <span>Eliminar</span>

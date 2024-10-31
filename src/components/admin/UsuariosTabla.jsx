@@ -1,104 +1,104 @@
-import Table from 'react-bootstrap/Table';
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
-
-//iconos FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faPaintBrush } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPaintBrush, faUser, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { useUsers, useDeleteUser } from '../../api/queries';
 
-
-const UsuariosTabla = ({setMensaje}) => {
-    const [usuarios, setUsuarios] = useState([])
-    const [usuario, setUsuario] = useState([])
-    const [actualizar, setActualizar] = useState([])
-    const navigate = useNavigate();
-
-
-    //usuarios[]
-  useEffect(() => {
-    try {
-      fetch('http://localhost:8000/users/', {
-        method: 'GET' /* or POST/PUT/PATCH/DELETE */,
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setUsuarios(data)
-        }
-        )
-    } catch (e) { console.log("error GET Usuarios:", e) }
-  }, [actualizar])
+const UsuariosTabla = ({ setMensaje }) => {
+  const { data: usuarios, isLoading, error } = useUsers();
+  const deleteUser = useDeleteUser();
+  const navigate = useNavigate();
 
   const onModificarUsuario = (usuario) => {
     navigate(`/usuariosmodificar/${usuario.id}`);
-  }
+  };
 
- //Eliminar Producto
- const onDeleteUsuario = (usuario) => {
+  const onDeleteUsuario = async (usuario) => {
+    if (!window.confirm('¿Está seguro que desea eliminar este usuario?')) {
+      return;
+    }
+
     try {
-      fetch(`http://localhost:8000/users/${usuario.id}/`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`
-        },
-      })
-        .then(() => {
-          setMensaje("Usuario Eliminado")
-          setActualizar(!actualizar)
-        }
-        )
-    } catch (e) { console.log("error onEliminarUsuario:", e) }
+      await deleteUser.mutateAsync(usuario.id);
+      setMensaje("Usuario eliminado exitosamente");
+    } catch (error) {
+      console.error("Error:", error);
+      setMensaje("Error al eliminar el usuario");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <FontAwesomeIcon icon={faUser} spin />
+        <p>Cargando usuarios...</p>
+      </div>
+    );
   }
 
-
-
+  if (error) {
     return (
-        <div className='contenedorTabla'>
-      <div className='titulo'>
-        <h4>Lista de Usuarios</h4>
+      <div className="error-container">
+        <FontAwesomeIcon icon={faExclamationTriangle} />
+        <p>Error al cargar los usuarios: {error.message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="usuarios-tabla">
+      <div className="usuarios-header">
+        <h2 className="usuarios-title">Lista de Usuarios</h2>
       </div>
 
-      <Table striped bordered hover className='Tabla'>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>user_name</th>
-            <th>first_name</th>
-            <th>last_name</th>
-            <th>email</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios.map((usuario) => {
-            return (
-              <tr key={usuario.id}>
-                <td>{usuario.id}</td>
-                <td>{usuario.username}</td>
-                <td>{usuario.first_name}</td>
-                <td>{usuario.last_name}</td>
-                <td>{usuario.email}</td>
-                <td>
-                  <button className='botonProcesar' onClick={() => { onModificarUsuario(usuario) }}>
-                    <FontAwesomeIcon icon={faPaintBrush} />
-                  </button>
-                </td>
-                <td>
-                  <button className='botonEliminar' onClick={() => { onDeleteUsuario(usuario) }}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                </td>
-              </tr>)
-          })}
-        </tbody>
-      </Table>
+      <div className="usuarios-content">
+        <div className="table-wrapper">
+          <table className="usuarios-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((usuario) => (
+                <tr key={usuario.id}>
+                  <td>{usuario.id}</td>
+                  <td>{usuario.username}</td>
+                  <td>{usuario.first_name}</td>
+                  <td>{usuario.last_name}</td>
+                  <td>{usuario.email}</td>
+                  <td>{usuario.group_name}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="btn-edit"
+                        onClick={() => onModificarUsuario(usuario)}
+                        disabled={deleteUser.isLoading}
+                      >
+                        <FontAwesomeIcon icon={faPaintBrush} />
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => onDeleteUsuario(usuario)}
+                        disabled={deleteUser.isLoading}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    )
-}
+  );
+};
 
-export default UsuariosTabla
+export default UsuariosTabla;
