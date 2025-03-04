@@ -1,0 +1,1 @@
+Este Repositorio contiene tanto el backend como el frontend del proyecto cafeteria
