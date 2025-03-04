@@ -1,0 +1,12 @@
+services:
+  - name: web
+    buildCommand:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - python manage.py collectstatic --no-input
+      - python manage.py migrate
+    startCommand: gunicorn cafeteria_be.wsgi:application
+    environment:
+      - DJANGO_SETTINGS_MODULE=cafeteria_be.settings
+    env: python=3.10
+    
