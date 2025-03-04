@@ -1,0 +1,21 @@
+Descripción del Proyecto:
+    Nombre del proyecto: FE-CAFETERIA
+    Entorno:
+        node: 18.15.0
+        npm: 9.6.4
+        librerías en dependencias de package.json
+
+    Detalles de la Instalación del proyecto:
+        Proyecto nuevo con Vite
+        npm init vite
+        project name: FE-CAFETERIA
+        select a framework: React
+        select a variant: javascript
+
+    Instalación del Entorno de desarrollo:
+        clonar el repositorio del proyecto: git clone https://gitlab.com/bootcamp335/fe-cafeteria.git
+        navegar hasta la ruta del proyecto: cd "fe-cafeteria"
+        instalar librerías del proyecto: npm i
+        ejecutar el proyecto modo dev: npm run dev
+
+    Docker run --name fe-cafeteria --network red-cafeteria -p 5173:5173 -d fe-cafeteria

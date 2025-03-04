@@ -1,0 +1,167 @@
+/* Layout principal */
+.container {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout para los componentes envolventes Indexes como ProductosIndex, PedidosIndex, Inicio*/
+.page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+  width: 100%;
+  min-height: calc(100vh - 64px); /* Resta la altura del navbar */
+  background-color: var(--bg-secondary); /*Beige claro*/
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.content {
+  flex: 1;
+  padding: var(--spacing-md) 0;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+}
+
+/*--------- Search Container Buscador en Productos, Pedidos y Carrito--------*/
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--spacing-md));
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all var(--transition-normal);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(144, 78, 42, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  pointer-events: none;
+}
+
+/* Search Container Responsive */
+@media (max-width: 768px) {
+  .search-container {
+    width: 100%;
+  }
+}
+
+/*---------------------- Estados de Loading y Error -------------------------------*/
+/* Estados de carga y error */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.loading-container svg,
+.error-container svg {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--primary-color);
+}
+
+.loading-container svg {
+  animation: spin 2s linear infinite;
+}
+
+/*Formularios*/
+/*Aun no hemos establecido convenciones para los Formularios del proyecto por lo que
+Manejan Propiedades Css independientes*/
+
+
+/*---------------------- Footer styles ------------------------------------------*/
+.footer-container {
+  background-color: var(--primary-color);
+  padding: var(--spacing-md) 0;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--spacing-xl);
+}
+
+.footer-link {
+  color: var(--text-light);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--primary-color);
+  transition: background-color var(--transition-fast);
+}
+
+.footer-link:hover {
+  background-color: var(--primary-light);
+}
+
+.footer-icon {
+  font-size: var(--font-size-lg);
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+}
+
+/*-----------------ANIMACIONES ----------------*/
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
