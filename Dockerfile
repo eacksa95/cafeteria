@@ -1,16 +1,18 @@
-# Base image
-FROM node:16
+FROM python:3.11.2
 
 RUN mkdir -p /cafeteria/app
 COPY . /cafeteria/app
 WORKDIR /cafeteria/app
 
-# Instalar dependencias
-RUN npm install
+RUN pip install --upgrade pip
 
-# Exponer el puerto en el que la aplicación se ejecutará (generalmente el 3000 para aplicaciones React)
-EXPOSE 5173
+RUN pip install -r requirements.txt
 
-# Comando para iniciar la aplicación cuando el contenedor se ejecute
-CMD ["npm", "run", "dev"]
-#RUN npm run build
+# RUN python manage.py makemigrations productos
+# RUN python manage.py makemigrations pedidos
+# RUN python manage.py makemigrations users
+# RUN python manage.py migrate
+
+EXPOSE 8000
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
