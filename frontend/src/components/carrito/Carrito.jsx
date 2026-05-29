@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import '../../estilos/carrito.css';
@@ -41,7 +43,7 @@ export const Carrito = ({
 
   const fetchPedidos = async () => {
     try {
-      const response = await fetch('http://localhost:8000/pedidos/', {
+      const response = await fetch('${API_URL}/pedidos/', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
@@ -91,7 +93,7 @@ export const Carrito = ({
     }
 
     try {
-      const response = await fetch('http://localhost:8000/pedidos/', {
+      const response = await fetch('${API_URL}/pedidos/', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
