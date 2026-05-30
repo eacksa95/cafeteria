@@ -22,6 +22,23 @@ const fetchWithAuth = async (url, options = {}) => {
 
 /*LOGIN QUERY*/
 
+export const useRegister = () => {
+  return useMutation({
+    mutationFn: async (userData) => {
+      const response = await fetch(`${API_URL}/users/register/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.username?.[0] || err.error || 'Error al registrar usuario');
+      }
+      return response.json();
+    },
+  });
+};
+
 export const useLogin = () => {
   return useMutation({
     mutationFn: async ({ username, password }) => {

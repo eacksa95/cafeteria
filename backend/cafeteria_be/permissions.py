@@ -10,14 +10,23 @@ def get_user_role(user):
         return None
 
 
+# Roles equivalentes para "mozo" (nombre anterior: recepcionista)
+MOZO = ('recepcionista', 'mozo')
+
+
 class IsRecepcionista(permissions.BasePermission):
     def has_permission(self, request, view):
-        return get_user_role(request.user) == 'recepcionista'
+        return get_user_role(request.user) in MOZO
 
 
 class IsCocinero(permissions.BasePermission):
     def has_permission(self, request, view):
         return get_user_role(request.user) == 'cocinero'
+
+
+class IsCajero(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return get_user_role(request.user) in ('cajero', 'admin')
 
 
 class IsAdmin(permissions.BasePermission):
@@ -27,9 +36,9 @@ class IsAdmin(permissions.BasePermission):
 
 class IsRecepcionistaOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return get_user_role(request.user) in ('recepcionista', 'admin')
+        return get_user_role(request.user) in (*MOZO, 'admin')
 
 
 class IsRecepcionistaOrCocinero(permissions.BasePermission):
     def has_permission(self, request, view):
-        return get_user_role(request.user) in ('recepcionista', 'cocinero', 'admin')
+        return get_user_role(request.user) in (*MOZO, 'cocinero', 'cajero', 'admin')

@@ -5,7 +5,7 @@ import jwtDecode from 'jwt-decode';
 import { useLogin } from '../../api/queries';
 import '../../estilos/login.css';
 
-const Login = ({ onLogin }) => {
+const Login = ({ onLogin, onRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -88,12 +88,22 @@ const Login = ({ onLogin }) => {
           </div>
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="btn-login"
           disabled={loginMutation.isLoading}
         >
           {loginMutation.isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+        </button>
+
+        <button
+          type="button"
+          onClick={onRegister}
+          style={{ marginTop: '10px', background: 'transparent', border: 'none',
+            color: 'var(--primary-color)', width: '100%', padding: '8px',
+            fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}
+        >
+          ¿No tenés cuenta? Registrate
         </button>
       </form>
     </div>

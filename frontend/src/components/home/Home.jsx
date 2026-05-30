@@ -53,7 +53,7 @@ const Home = ({ onLogout, userId }) => {
   return (
     <div className="home-container">
       <BrowserRouter>
-        <Navbar onLogout={onLogout} />
+        <Navbar onLogout={onLogout} role={role} />
 
         <main className="main-content">
           <div className="container">
@@ -94,7 +94,7 @@ const Home = ({ onLogout, userId }) => {
             <Route element={
               <ProtectedRoute 
                 redirectTo="/noauth" 
-                isAllowed={!!user && (role?.includes("recepcionista") || role?.includes("admin"))} 
+                isAllowed={!!user && (role?.includes("recepcionista") || role?.includes("mozo") || role?.includes("admin"))}
               />
             }>
               <Route path="/productosindex" element={

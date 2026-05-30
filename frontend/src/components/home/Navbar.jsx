@@ -3,41 +3,40 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const Navbar = ({ onLogout }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const MOZO = ['mozo', 'recepcionista'];
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+// null en roles = visible para cualquier usuario autenticado
+const NAV_LINKS = [
+  { to: '/',             label: 'Inicio',    roles: null },
+  { to: '/pedidosindex', label: 'Pedidos',   roles: null },
+  { to: '/carrito',      label: 'Carrito',   roles: [...MOZO, 'admin'] },
+  { to: '/productosindex', label: 'Productos', roles: [...MOZO, 'cocinero', 'admin'] },
+  { to: '/admin',        label: 'Admin',     roles: ['admin'] },
+];
+
+const Navbar = ({ onLogout, role }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const close = () => setIsOpen(false);
+
+  const visible = NAV_LINKS.filter(l => !l.roles || l.roles.includes(role));
 
   return (
     <nav className="navbar">
       <div className="navbar-content">
         <h4 className="navbar-brand">Coffee Shop</h4>
-        
-        <button className="navbar-toggle" onClick={toggleMenu}>
+
+        <button className="navbar-toggle" onClick={() => setIsOpen(v => !v)}>
           <FontAwesomeIcon icon={isOpen ? faTimes : faBars} />
         </button>
 
         <div className={`navbar-collapse ${isOpen ? 'show' : ''}`}>
           <ul className="nav-list">
-            <li className="nav-item">
-              <Link to="/" className="nav-link" onClick={toggleMenu}>Inicio</Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/pedidosindex" className="nav-link" onClick={toggleMenu}>Pedidos</Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/productosindex" className="nav-link" onClick={toggleMenu}>Productos</Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/carrito" className="nav-link" onClick={toggleMenu}>Carrito</Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/admin" className="nav-link" onClick={toggleMenu}>Admin</Link>
-            </li>
+            {visible.map(l => (
+              <li key={l.to} className="nav-item">
+                <Link to={l.to} className="nav-link" onClick={close}>{l.label}</Link>
+              </li>
+            ))}
           </ul>
-
           <button onClick={onLogout} className="btn btn-logout">
             Cerrar sesión
           </button>
