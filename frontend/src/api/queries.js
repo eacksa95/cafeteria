@@ -237,7 +237,7 @@ export const useUpdatePedido = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, ...pedidos }) => 
+    mutationFn: ({ id, ...pedido }) =>
       fetchWithAuth(`/pedidos/${id}/`, {
         method: 'PUT',
         body: JSON.stringify(pedido),

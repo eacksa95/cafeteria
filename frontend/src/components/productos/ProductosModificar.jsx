@@ -1,147 +1,69 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faImage, faCoffee, faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { useProducto, useUpdateProducto } from '../../api/queries';
 
-const ProductosModificar = ({ setMensaje }) => {
+const IMG_DEFAULT = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
+
+const ProductosModificar = ({ setMensaje, role }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: producto, isLoading, error, refetch } = useProducto(id);
+  const { data: producto, isLoading, error } = useProducto(id);
   const updateMutation = useUpdateProducto();
-  console.log("actualizar datos")
-  const [formData, setFormData] = useState({
-    nombre: '',
-    precio: '',
-    cantidad: 1,
-    img: 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg'
-  });
+  const isAdmin = role === 'admin';
+
+  const [form, setForm] = useState({ nombre: '', precio: '', cantidad: 1, img: IMG_DEFAULT });
 
   useEffect(() => {
-    if (producto) {
-      setFormData({
-        nombre: producto.nombre || '',
-        precio: producto.precio || '',
-        cantidad: producto.cantidad || 1,
-        img: producto.img || 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg'
-      });
-    }
+    if (producto) setForm({ nombre: producto.nombre || '', precio: producto.precio || '', cantidad: producto.cantidad || 1, img: producto.img || IMG_DEFAULT });
   }, [producto]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const submit = async e => {
     e.preventDefault();
-    
     try {
-      await updateMutation.mutateAsync({
-        id,
-        ...formData
-      });
-      
-      setMensaje("Producto actualizado exitosamente");
+      const data = isAdmin ? form : { nombre: form.nombre, cantidad: form.cantidad, img: form.img };
+      await updateMutation.mutateAsync({ id, ...data });
+      setMensaje('Producto actualizado');
       navigate('/productosindex');
-    } catch (error) {
-      setMensaje('Error al actualizar el producto');
-      console.error('Error updating product:', error);
-    }
+    } catch { setMensaje('Error al actualizar el producto'); }
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <FontAwesomeIcon icon={faCoffee} spin />
-        <p>Cargando producto...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <p>Error al cargar el producto: {error.message}</p>
-      </div>
-    );
-  }
+  if (isLoading) return <p className="state-loading">Cargando producto...</p>;
+  if (error)    return <p className="state-error">Error al cargar el producto</p>;
 
   return (
-    <div className="producto-nuevo-container">
-      <div className="producto-nuevo-form-header">
-        <h3>Modificar Producto</h3>
-        <p>Actualizar datos del producto</p>
-      </div>
+    <div className="card max-w-md">
+      <h3 className="text-lg font-semibold text-stone-100 mb-1">Modificar Producto</h3>
+      <p className="text-stone-400 text-sm mb-5">Actualizá los datos de <span className="text-amber-400">{producto?.nombre}</span></p>
 
-      <form onSubmit={handleSubmit} className="producto-nuevo-form">
-        <div className="form-group">
-          <div className="input-icon">
-            <FontAwesomeIcon icon={faCoffee} className="icon" />
-            <input
-              className="form-input"
-              name="nombre"
-              placeholder="Nombre del Producto"
-              type="text"
-              value={formData.nombre}
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <form onSubmit={submit} className="space-y-3">
+        <input className="input-base" name="nombre" placeholder="Nombre *" required value={form.nombre} onChange={handle} />
+
+        <div className="relative">
+          <input
+            className={`input-base ${!isAdmin ? 'opacity-60 cursor-not-allowed bg-stone-800/50' : ''}`}
+            name="precio" placeholder="Precio" type="number" step="0.01" min="0"
+            value={form.precio} onChange={handle} disabled={!isAdmin}
+          />
+          {!isAdmin && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-stone-500 text-xs">
+              <FontAwesomeIcon icon={faLock} size="xs" /> Solo admin
+            </div>
+          )}
         </div>
 
-        <div className="form-group">
-          <div className="input-icon">
-            <FontAwesomeIcon icon={faDollarSign} className="icon" />
-            <input
-              className="form-input"
-              name="precio"
-              placeholder="Precio"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.precio}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
+        <input className="input-base" name="img" placeholder="URL imagen" value={form.img} onChange={handle} />
 
-        <div className="form-group">
-          <div className="input-icon">
-            <FontAwesomeIcon icon={faImage} className="icon" />
-            <input
-              className="form-input"
-              name="img"
-              placeholder="URL de la imagen"
-              type="text"
-              value={formData.img}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        {formData.img && (
-          <div className="image-preview">
-            <img 
-              src={formData.img} 
-              alt="Vista previa"
-              onError={(e) => {
-                e.target.src = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
-              }}
-            />
-          </div>
+        {form.img && (
+          <img src={form.img} alt="preview" className="w-20 h-20 rounded-lg object-cover border border-stone-700"
+            onError={e => { e.target.src = IMG_DEFAULT; }} />
         )}
 
-        <button 
-          type="submit" 
-          className="btn-submit"
-          disabled={updateMutation.isLoading}
-        >
-          {updateMutation.isLoading ? 'Actualizando...' : 'Guardar Cambios'}
+        <button type="submit" className="btn-primary w-full" disabled={updateMutation.isLoading}>
+          {updateMutation.isLoading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </form>
     </div>

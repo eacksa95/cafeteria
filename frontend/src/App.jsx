@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import './estilos/app.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
 import Login from './components/login/Login'
 import Register from './components/login/Register'
 import Home from './components/home/Home'
@@ -29,7 +26,7 @@ function App() {
   }
 
   return (
-    <div className="app-wrapper">
+    <div className="min-h-screen bg-stone-950">
       {userId ? (
         <Home onLogout={onLogoutHandler} userId={userId} />
       ) : showRegister ? (

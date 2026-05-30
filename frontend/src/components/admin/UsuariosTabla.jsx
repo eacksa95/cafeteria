@@ -1,102 +1,69 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPaintBrush, faUser, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPen } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import { useUsers, useDeleteUser } from '../../api/queries';
+
+const ROLE_BADGE = {
+  admin: 'bg-amber-900/50 text-amber-400 border-amber-700',
+  mozo: 'bg-blue-900/50 text-blue-400 border-blue-700',
+  cocinero: 'bg-orange-900/50 text-orange-400 border-orange-700',
+  cajero: 'bg-emerald-900/50 text-emerald-400 border-emerald-700',
+};
 
 const UsuariosTabla = ({ setMensaje }) => {
   const { data: usuarios, isLoading, error } = useUsers();
   const deleteUser = useDeleteUser();
   const navigate = useNavigate();
 
-  const onModificarUsuario = (usuario) => {
-    navigate(`/usuariosmodificar/${usuario.id}`);
-  };
-
-  const onDeleteUsuario = async (usuario) => {
-    if (!window.confirm('¿Está seguro que desea eliminar este usuario?')) {
-      return;
-    }
-
+  const onDelete = async (u) => {
+    if (!window.confirm(`¿Eliminar al usuario ${u.username}?`)) return;
     try {
-      await deleteUser.mutateAsync(usuario.id);
-      setMensaje("Usuario eliminado exitosamente");
-    } catch (error) {
-      console.error("Error:", error);
-      setMensaje("Error al eliminar el usuario");
-    }
+      await deleteUser.mutateAsync(u.id);
+      setMensaje('Usuario eliminado');
+    } catch { setMensaje('Error al eliminar'); }
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <FontAwesomeIcon icon={faUser} spin />
-        <p>Cargando usuarios...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <FontAwesomeIcon icon={faExclamationTriangle} />
-        <p>Error al cargar los usuarios: {error.message}</p>
-      </div>
-    );
-  }
+  if (isLoading) return <p className="state-loading">Cargando usuarios...</p>;
+  if (error)    return <p className="state-error">Error al cargar usuarios</p>;
 
   return (
-    <div className="usuarios-tabla">
-      <div className="usuarios-header">
-        <h2 className="usuarios-title">Lista de Usuarios</h2>
-      </div>
-
-      <div className="usuarios-content">
-        <div className="table-wrapper">
-          <table className="usuarios-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((usuario) => (
-                <tr key={usuario.id}>
-                  <td>{usuario.id}</td>
-                  <td>{usuario.username}</td>
-                  <td>{usuario.first_name}</td>
-                  <td>{usuario.last_name}</td>
-                  <td>{usuario.email}</td>
-                  <td>{usuario.group_name}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button
-                        className="btn-edit"
-                        onClick={() => onModificarUsuario(usuario)}
-                        disabled={deleteUser.isLoading}
-                      >
-                        <FontAwesomeIcon icon={faPaintBrush} />
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => onDeleteUsuario(usuario)}
-                        disabled={deleteUser.isLoading}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div className="card overflow-x-auto">
+      <h3 className="text-lg font-semibold text-stone-100 mb-4">Usuarios ({usuarios?.length})</h3>
+      <table className="table-base w-full">
+        <thead>
+          <tr>
+            {['#', 'Usuario', 'Nombre', 'Email', 'Rol', ''].map(h => (
+              <th key={h}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {usuarios?.map(u => (
+            <tr key={u.id} className="hover:bg-stone-800/30 transition-colors">
+              <td className="text-stone-500">{u.id}</td>
+              <td className="font-medium text-stone-100">{u.username}</td>
+              <td>{u.first_name} {u.last_name}</td>
+              <td className="text-stone-400">{u.email}</td>
+              <td>
+                <span className={`px-2 py-0.5 rounded-full text-xs border ${ROLE_BADGE[u.group_name] || 'bg-stone-800 text-stone-400 border-stone-700'}`}>
+                  {u.group_name || '—'}
+                </span>
+              </td>
+              <td>
+                <div className="flex gap-2">
+                  <button onClick={() => navigate(`/usuariosmodificar/${u.id}`)} className="btn-edit" title="Editar">
+                    <FontAwesomeIcon icon={faPen} size="xs" />
+                  </button>
+                  <button onClick={() => onDelete(u)} className="btn-danger" title="Eliminar" disabled={deleteUser.isLoading}>
+                    <FontAwesomeIcon icon={faTrash} size="xs" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!usuarios?.length && <p className="state-empty">No hay usuarios registrados</p>}
     </div>
   );
 };

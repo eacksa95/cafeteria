@@ -7,7 +7,7 @@ from .serializers import UserSerializer
 from cafeteria_be.permissions import IsAdmin, IsRecepcionistaOrCocinero
 
 # Roles que se pueden auto-seleccionar en registro público (admin nunca)
-PUBLIC_ROLES = ('mozo', 'recepcionista', 'cocinero', 'cajero')
+PUBLIC_ROLES = ('mozo', 'cocinero', 'cajero')
 
 
 class UsersViewSet(viewsets.ModelViewSet):

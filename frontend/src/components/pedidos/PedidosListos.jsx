@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCheck, faCoffee, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTrash, faClock } from '@fortawesome/free-solid-svg-icons';
 import { usePedidos, useUpdatePedido, useDeletePedido } from '../../api/queries';
 
 const PedidosListos = ({ setMensaje }) => {
@@ -8,136 +7,63 @@ const PedidosListos = ({ setMensaje }) => {
   const updatePedido = useUpdatePedido();
   const deletePedido = useDeletePedido();
 
-  const entregarPedido = async (pedido) => {
-    const currentDate = new Date();
-    const hora_entregado = currentDate.toLocaleTimeString([], { hour12: false });
-    
+  const entregar = async (pedido) => {
     try {
-      await updatePedido.mutateAsync({
-        ...pedido,
-        estado: "entregado",
-        hora_entregado
-      });
-      
-      setMensaje("Pedido entregado correctamente");
-    } catch (error) {
-      console.error('Error al entregar el pedido:', error);
-      setMensaje("Error al entregar el pedido");
-    }
+      await updatePedido.mutateAsync({ ...pedido, estado: 'entregado', hora_entregado: new Date().toLocaleTimeString([], { hour12: false }) });
+      setMensaje('Pedido entregado ✓');
+    } catch { setMensaje('Error al entregar'); }
   };
 
-  const eliminarPedido = async (pedido) => {
-    if (!window.confirm('¿Está seguro que desea eliminar este pedido?')) {
-      return;
-    }
-
+  const eliminar = async (pedido) => {
+    if (!window.confirm(`¿Eliminar Pedido #${pedido.id}?`)) return;
     try {
       await deletePedido.mutateAsync(pedido.id);
-      setMensaje("Pedido eliminado correctamente");
-    } catch (error) {
-      console.error('Error al eliminar el pedido:', error);
-      setMensaje("Error al eliminar el pedido");
-    }
+      setMensaje('Pedido eliminado');
+    } catch { setMensaje('Error al eliminar'); }
   };
 
-  if (isLoading) {
-    return (
-      <div className="pedidos-tabla">
-        <div className="pedidos-table-header">
-          <h4>Pedidos Listos</h4>
-        </div>
-        <div className="loading-container">
-          <FontAwesomeIcon icon={faCoffee} spin />
-          <p>Cargando pedidos...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <p className="state-loading">Cargando pedidos...</p>;
+  if (error)    return <p className="state-error">Error al cargar pedidos</p>;
 
-  if (error) {
-    return (
-      <div className="pedidos-tabla">
-        <div className="pedidos-table-header">
-          <h4>Pedidos Listos</h4>
-        </div>
-        <div className="error-container">
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <p>Error al cargar los pedidos. Por favor, intente nuevamente.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const pedidosListos = pedidos?.filter(pedido => pedido.estado === "listo") || [];
+  const listos = pedidos?.filter(p => p.estado === 'listo') || [];
 
   return (
-    <div className="pedidos-tabla">
-      <div className="pedidos-table-header">
-        <h4>Pedidos Listos</h4>
-      </div>
+    <div>
+      <h3 className="text-base font-semibold text-stone-300 mb-3">
+        Listos para entregar <span className="ml-1 text-emerald-400 font-bold">{listos.length}</span>
+      </h3>
 
-      <div className="table-content">
-        {pedidosListos.map((pedido) => {
-          const [hora, minutos] = pedido.hora_listo.split(':');
-          const fechaActual = new Date();
-          fechaActual.setHours(hora);
-          fechaActual.setMinutes(minutos);
+      {!listos.length && <p className="state-empty">No hay pedidos listos</p>}
 
-          const horaAMPM = fechaActual.toLocaleString('en-US', {
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true
-          });
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {listos.map(pedido => {
+          const hora = new Date();
+          try { const [h, m] = (pedido.hora_listo || '').split(':'); hora.setHours(h, m); } catch {}
           return (
-            <div className="card_pedido" key={pedido.id}>
-              <div className="pedido-info">
-                <h3>Pedido #{pedido.id}</h3>
-                <p>
-                  <span>Cliente:</span>
-                  <span>{pedido.cliente}</span>
-                </p>
-                <p>
-                  <span>Mesa:</span>
-                  <span>{pedido.mesa}</span>
-                </p>
-                <p>
-                  <span>Listo desde:</span>
-                  <span>{horaAMPM}</span>
-                </p>
-                <p>
-                  <span>Total:</span>
-                  <span>${pedido.monto}</span>
-                </p>
+            <div key={pedido.id} className="bg-stone-900 rounded-xl border border-emerald-800/40 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-bold text-emerald-400">Pedido #{pedido.id}</span>
+                <span className="text-xs text-stone-500 flex items-center gap-1">
+                  <FontAwesomeIcon icon={faClock} size="xs" />
+                  Listo: {hora.toLocaleString('es', { hour: 'numeric', minute: '2-digit' })}
+                </span>
               </div>
-              
-              <div className="pedido-actions">
-                <button 
-                  className="btn-action btn-procesar"
-                  onClick={() => entregarPedido(pedido)}
-                  disabled={updatePedido.isLoading || deletePedido.isLoading}
-                >
-                  <FontAwesomeIcon icon={faCheck} />
-                  <span>Entregar</span>
+              <div className="space-y-1 text-sm text-stone-300 mb-4">
+                <p><span className="text-stone-500">Cliente:</span> {pedido.cliente}</p>
+                <p><span className="text-stone-500">Mesa:</span> {pedido.mesa}</p>
+                <p><span className="text-stone-500">Total:</span> <span className="text-amber-400 font-medium">${pedido.monto}</span></p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => entregar(pedido)} className="btn-success flex-1 justify-center" disabled={updatePedido.isPending}>
+                  <FontAwesomeIcon icon={faCheck} size="xs" /> Entregar
                 </button>
-                <button 
-                  className="btn-action btn-eliminar"
-                  onClick={() => eliminarPedido(pedido)}
-                  disabled={updatePedido.isLoading || deletePedido.isLoading}
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                  <span>Eliminar</span>
+                <button onClick={() => eliminar(pedido)} className="btn-danger" disabled={deletePedido.isPending}>
+                  <FontAwesomeIcon icon={faTrash} size="xs" />
                 </button>
               </div>
             </div>
           );
         })}
-
-        {pedidosListos.length === 0 && (
-          <div className="no-pedidos">
-            <p>No hay pedidos listos</p>
-          </div>
-        )}
       </div>
     </div>
   );

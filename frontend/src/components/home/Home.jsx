@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-//Origen de los Datos QUERY
 import { useUser } from '../../api/queries';
-//estilos
-import '../../estilos/home.css';
-//componentes de Home
 import Navbar from './Navbar';
 import { Foo } from './Foo';
-import DropdownMenu from './DropdownMenu';
 import { ProtectedRoute } from '../ProtectedRoute';
-//componentes de rutas
 import { Inicio } from './Inicio';
 import NoAuth from '../info/NoAuth';
 import AdminIndex from '../admin/AdminIndex';
 import Perfil from '../admin/Perfil';
 import UsuariosNuevo from '../admin/UsuariosNuevo';
 import UsuariosModificar from '../admin/UsuariosModificar';
+import UsuariosTabla from '../admin/UsuariosTabla';
 import { CarritoIndex } from '../carrito/CarritoIndex';
 import PedidosIndex from '../pedidos/PedidosIndex';
 import PedidosListos from '../pedidos/PedidosListos';
@@ -24,134 +19,80 @@ import ProductosIndex from '../productos/ProductosIndex';
 import ProductosTabla from '../productos/ProductosTabla';
 import ProductosNuevo from '../productos/ProductosNuevo';
 import ProductosModificar from '../productos/ProductosModificar';
-import UsuariosTabla from '../admin/UsuariosTabla';
 
-/**Componente principal de la aplicacion
- * Desde aqui se pueden acceder a todas las rutas
-*/
 const Home = ({ onLogout, userId }) => {
   const { data: user, isLoading } = useUser(userId);
   const [mensaje, setMensaje] = useState('');
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
-  
+
   const role = user?.group_name;
 
   useEffect(() => {
     if (mensaje) {
       setMostrarMensaje(true);
-      setTimeout(() => {
-        setMensaje('');
-        setMostrarMensaje(false);
-      }, 3000);
+      const t = setTimeout(() => { setMensaje(''); setMostrarMensaje(false); }, 3000);
+      return () => clearTimeout(t);
     }
   }, [mensaje]);
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
+        <p className="text-stone-400 animate-pulse">Cargando...</p>
+      </div>
+    );
   }
 
+  const isAdmin = role === 'admin';
+  const canViewProducts = ['mozo', 'cocinero', 'admin'].includes(role);
+  const canViewCarrito  = ['mozo', 'admin'].includes(role);
+
   return (
-    <div className="home-container">
+    <div className="min-h-screen bg-stone-950 flex flex-col">
       <BrowserRouter>
-        <Navbar onLogout={onLogout} role={role} />
+        <Navbar onLogout={onLogout} role={role} username={user?.username} />
 
-        <main className="main-content">
-          <div className="container">
-            <div className="page-header">
+        {mostrarMensaje && (
+          <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-amber-800/90 text-amber-100 px-4 py-2 rounded-lg text-sm border border-amber-700 shadow-lg">
+            {mensaje}
+          </div>
+        )}
 
-              <div className="mensaje-container">
-                  {mostrarMensaje && <span className="mensaje">{mensaje}</span>}
-              </div>
-           </div>
-
-          <div className="page-container">
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<Inicio />} />
-            <Route path="/noauth" element={
-              <Inicio>
-                <NoAuth setMensaje={setMensaje} />
-              </Inicio>
-            } />
-            
+            <Route path="/noauth" element={<NoAuth />} />
+
+            {/* Todos los autenticados */}
             <Route element={<ProtectedRoute isAllowed={!!user} />}>
-              <Route path="/pedidosindex" element={
-                <PedidosIndex>
-                  <PedidosPendientes setMensaje={setMensaje} />
-                </PedidosIndex>
-              } />
-              <Route path="/pedidospendientes" element={
-                <PedidosIndex>
-                  <PedidosPendientes setMensaje={setMensaje} />
-                </PedidosIndex>
-              } />
-              <Route path="/pedidoslistos" element={
-                <PedidosIndex>
-                  <PedidosListos setMensaje={setMensaje} />
-                </PedidosIndex>
-              } />
+              <Route path="/pedidosindex" element={<PedidosIndex><PedidosPendientes setMensaje={setMensaje} /></PedidosIndex>} />
+              <Route path="/pedidospendientes" element={<PedidosIndex><PedidosPendientes setMensaje={setMensaje} /></PedidosIndex>} />
+              <Route path="/pedidoslistos" element={<PedidosIndex><PedidosListos setMensaje={setMensaje} /></PedidosIndex>} />
             </Route>
 
-            <Route element={
-              <ProtectedRoute 
-                redirectTo="/noauth" 
-                isAllowed={!!user && (role?.includes("recepcionista") || role?.includes("mozo") || role?.includes("admin"))}
-              />
-            }>
-              <Route path="/productosindex" element={
-                <ProductosIndex>
-                  <ProductosTabla setMensaje={setMensaje} />
-                </ProductosIndex>
-              } />
-              <Route path="/productosnuevo" element={
-                <ProductosIndex>
-                  <ProductosNuevo setMensaje={setMensaje} />
-                </ProductosIndex>
-              } />
-              <Route path="/productosmodificar/:id" element={
-                <ProductosIndex>
-                  <ProductosModificar setMensaje={setMensaje} />
-                </ProductosIndex>
-              } />
-              <Route path="/carrito" element={
-                <CarritoIndex setMensaje={setMensaje} />
-              } />
+            {/* Mozo + Cocinero + Admin */}
+            <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && canViewProducts} />}>
+              <Route path="/productosindex" element={<ProductosIndex role={role}><ProductosTabla setMensaje={setMensaje} /></ProductosIndex>} />
+              <Route path="/productosnuevo" element={<ProductosIndex role={role}><ProductosNuevo setMensaje={setMensaje} role={role} /></ProductosIndex>} />
+              <Route path="/productosmodificar/:id" element={<ProductosIndex role={role}><ProductosModificar setMensaje={setMensaje} role={role} /></ProductosIndex>} />
             </Route>
 
-            <Route element={
-              <ProtectedRoute 
-                redirectTo="/noauth" 
-                isAllowed={!!user && role?.includes("admin")} 
-              />
-            }>
-              <Route path="/admin" element={
-                <AdminIndex>
-                  <Perfil userId={userId} />
-                </AdminIndex>
-              } />
-              <Route path="/usuariostabla" element={
-                <AdminIndex>
-                  <UsuariosTabla setMensaje={setMensaje} />
-                </AdminIndex>
-              } />
-              <Route path="/usuariosnuevo" element={
-                <AdminIndex>
-                  <UsuariosNuevo setMensaje={setMensaje} />
-                </AdminIndex>
-              } />
-              <Route path="/usuariosmodificar/:id" element={
-                <AdminIndex>
-                  <UsuariosModificar setMensaje={setMensaje} />
-                </AdminIndex>
-              } />
+            {/* Mozo + Admin */}
+            <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && canViewCarrito} />}>
+              <Route path="/carrito" element={<CarritoIndex setMensaje={setMensaje} />} />
+            </Route>
+
+            {/* Solo Admin */}
+            <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && isAdmin} />}>
+              <Route path="/admin" element={<AdminIndex><Perfil userId={userId} /></AdminIndex>} />
+              <Route path="/usuariostabla" element={<AdminIndex><UsuariosTabla setMensaje={setMensaje} /></AdminIndex>} />
+              <Route path="/usuariosnuevo" element={<AdminIndex><UsuariosNuevo setMensaje={setMensaje} /></AdminIndex>} />
+              <Route path="/usuariosmodificar/:id" element={<AdminIndex><UsuariosModificar setMensaje={setMensaje} /></AdminIndex>} />
             </Route>
           </Routes>
-          </div>
-          </div>
         </main>
 
-        <footer className="footer">
         <Foo />
-        </footer>
       </BrowserRouter>
     </div>
   );

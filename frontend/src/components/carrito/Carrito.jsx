@@ -1,214 +1,104 @@
 import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
-import '../../estilos/carrito.css';
 
-export const Carrito = ({
-  pedidoNuevo,
-  allProducts,
-  setAllProducts,
-  total,
-  countProducts,
-  setCountProducts,
-  setTotal,
-}) => {
-  const [active, setActive] = useState(false);
+export const Carrito = ({ pedidoNuevo, allProducts, setAllProducts, total, countProducts, setCountProducts, setTotal }) => {
   const [cliente, setCliente] = useState('');
-  const [mesa, setMesa] = useState('');
+  const [mesa, setMesa]       = useState('');
   const [pedidos, setPedidos] = useState([]);
-  const [id, setId] = useState();
-  const [actualizar, setActualizar] = useState(false);
-  const [productosIds, setProductosIds] = useState([]);
-  const [productosCantidad, setProductosCantidad] = useState([]);
+  const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    fetchPedidos();
-  }, [actualizar]);
-
-  useEffect(() => {
-    obtenerIdMasAlto();
-  }, [pedidos]);
-
-  useEffect(() => {
-    const productIds = allProducts.map((producto) => producto.id);
-    setProductosIds(productIds);
-  }, [allProducts]);
-
-  useEffect(() => {
-    const cantidades = allProducts.map((producto) => producto.cantidad);
-    setProductosCantidad(cantidades);
-  }, [allProducts]);
+  useEffect(() => { fetchPedidos(); }, []);
 
   const fetchPedidos = async () => {
     try {
-      const response = await fetch('${API_URL}/pedidos/', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-          'Content-Type': 'application/json',
-        },
+      const r = await fetch(`${API_URL}/pedidos/`, {
+        headers: { Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`, 'Content-Type': 'application/json' },
       });
-      const data = await response.json();
-      setPedidos(data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
+      if (r.ok) setPedidos(await r.json());
+    } catch {}
   };
 
-  const obtenerIdMasAlto = () => {
-    const idMasAlto = pedidos.reduce((maxId, pedido) => {
-      return pedido.id > maxId ? pedido.id : maxId;
-    }, 0);
-    setId(idMasAlto + 1);
-  };
-
-  const onDeleteProduct = (producto) => {
-    const results = allProducts.filter(item => item.id !== producto.id);
+  const onDelete = (producto) => {
+    setAllProducts(allProducts.filter(i => i.id !== producto.id));
     setTotal(total - producto.precio * producto.cantidad);
     setCountProducts(countProducts - producto.cantidad);
-    setAllProducts(results);
   };
 
-  const onCleanCart = () => {
-    setAllProducts([]);
-    setTotal(0);
-    setCountProducts(0);
-    setActive(false);
-  };
+  const onClean = () => { setAllProducts([]); setTotal(0); setCountProducts(0); };
 
-  const onEnviarPedido = async () => {
-    if (!cliente.trim()) {
-      alert('Por favor ingrese el nombre del cliente');
-      return;
-    }
-    if (!mesa) {
-      alert('Por favor ingrese el número de mesa');
-      return;
-    }
-    if (allProducts.length === 0) {
-      alert('El carrito está vacío');
-      return;
-    }
+  const onEnviar = async () => {
+    if (!cliente.trim()) { alert('Ingresá el nombre del cliente'); return; }
+    if (!mesa)           { alert('Ingresá el número de mesa'); return; }
+    if (!allProducts.length) { alert('El carrito está vacío'); return; }
 
+    const nextId = pedidos.reduce((m, p) => p.id > m ? p.id : m, 0) + 1;
+    setSending(true);
     try {
-      const response = await fetch('${API_URL}/pedidos/', {
+      const r = await fetch(`${API_URL}/pedidos/`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('accessToken'))}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id,
-          cliente,
-          mesa,
-          lista_productos: productosIds,
-          lista_cantidad: productosCantidad,
+          id: nextId, cliente, mesa,
+          lista_productos: allProducts.map(p => p.id),
+          lista_cantidad:  allProducts.map(p => p.cantidad),
           monto: total,
-          estado: "pendiente",
+          estado: 'pendiente',
           fecha_recepcion: new Date().toISOString().split('T')[0],
-          hora_recepcion: new Date().toLocaleTimeString([], { hour12: false }),
-          hora_listo: null,
-          hora_entregado: null
+          hora_recepcion:  new Date().toLocaleTimeString([], { hour12: false }),
+          hora_listo: null, hora_entregado: null,
         }),
       });
-
-      if (response.ok) {
-        pedidoNuevo();
-        setActive(false);
-        setActualizar(!actualizar);
-        onCleanCart();
-        setCliente('');
-        setMesa('');
-      }
-    } catch (error) {
-      console.error('Error al enviar pedido:', error);
-    }
+      if (r.ok) { pedidoNuevo(); onClean(); setCliente(''); setMesa(''); fetchPedidos(); }
+    } catch { alert('Error al enviar el pedido'); }
+    finally { setSending(false); }
   };
 
   return (
-    <div className="carrito-container">
-      <div className="carrito-header">
-        <h2 className="carrito-title">Tu Pedido</h2>
-        <div className="cart-icon-container" onClick={() => setActive(!active)}>
-          <FontAwesomeIcon icon={faShoppingCart} className="cart-icon" />
-          {countProducts > 0 && (
-            <span className="cart-count">{countProducts}</span>
-          )}
-        </div>
+    <div className="card sticky top-20">
+      <div className="flex items-center gap-2 mb-4">
+        <FontAwesomeIcon icon={faShoppingCart} className="text-amber-500" />
+        <h3 className="font-semibold text-stone-100">Tu Pedido</h3>
+        {countProducts > 0 && (
+          <span className="ml-auto bg-amber-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">{countProducts}</span>
+        )}
       </div>
 
-      <div className="cliente-form">
-        <div className="form-group">
-          <input
-            className="form-input"
-            placeholder="Nombre del Cliente"
-            value={cliente}
-            onChange={(e) => setCliente(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <input
-            className="form-input"
-            placeholder="Número de Mesa"
-            type="number"
-            value={mesa}
-            onChange={(e) => setMesa(e.target.value)}
-          />
-        </div>
-      </div>
+      <input className="input-base mb-2" placeholder="Nombre del cliente *" value={cliente} onChange={e => setCliente(e.target.value)} />
+      <input className="input-base mb-4" placeholder="Mesa #" type="number" value={mesa} onChange={e => setMesa(e.target.value)} />
 
-      <div className={`modal-overlay ${active ? 'show' : ''}`} onClick={() => setActive(false)}>
-        <div className="modal-container cart-modal" onClick={e => e.stopPropagation()}>
-          <button className="modal-close" onClick={() => setActive(false)}>
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-          
-          <div className="modal-content">
-            <h3 className="cart-modal-title">Carrito de Compras</h3>
-            
-            {allProducts.length ? (
-              <>
-                <div className="cart-items">
-                  {allProducts.map(producto => (
-                    <div className="cart-item" key={producto.id}>
-                      <div className="item-info">
-                        <h4 className="item-title">{producto.nombre}</h4>
-                        <div className="item-details">
-                          <span className="item-quantity">x{producto.cantidad}</span>
-                          <span className="item-price">${producto.precio}</span>
-                        </div>
-                      </div>
-                      <button 
-                        className="btn-remove"
-                        onClick={() => onDeleteProduct(producto)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="cart-footer">
-                  <div className="cart-total">
-                    <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <button className="btn-checkout" onClick={onEnviarPedido}>
-                    Enviar Pedido
-                  </button>
-                  <button className="btn-remove" onClick={onCleanCart}>
-                    Vaciar Carrito
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="cart-empty">El carrito está vacío</p>
-            )}
+      {allProducts.length ? (
+        <>
+          <div className="space-y-2 mb-4 max-h-52 overflow-y-auto">
+            {allProducts.map(p => (
+              <div key={p.id} className="flex items-center justify-between text-sm">
+                <span className="text-stone-300 truncate flex-1">{p.nombre}</span>
+                <span className="text-stone-500 mx-2">x{p.cantidad}</span>
+                <span className="text-amber-400 font-medium mr-2">${(p.precio * p.cantidad).toFixed(2)}</span>
+                <button onClick={() => onDelete(p)} className="text-red-500 hover:text-red-400 transition-colors">
+                  <FontAwesomeIcon icon={faTrash} size="xs" />
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
+
+          <div className="border-t border-stone-800 pt-3 mb-4 flex justify-between font-semibold">
+            <span className="text-stone-300">Total</span>
+            <span className="text-amber-400">${total.toFixed(2)}</span>
+          </div>
+
+          <button onClick={onEnviar} className="btn-primary w-full mb-2" disabled={sending}>
+            {sending ? 'Enviando...' : 'Enviar Pedido'}
+          </button>
+          <button onClick={onClean} className="w-full text-stone-500 hover:text-red-400 text-xs transition-colors">
+            Vaciar carrito
+          </button>
+        </>
+      ) : (
+        <p className="text-stone-500 text-sm text-center py-4">El carrito está vacío</p>
+      )}
     </div>
   );
 };
