@@ -1,23 +1,35 @@
 from rest_framework import permissions
-    
+
+
+def get_user_role(user):
+    if user.is_superuser:
+        return 'admin'
+    try:
+        return user.groups.get().name
+    except Exception:
+        return None
+
+
 class IsRecepcionista(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.groups.get().name == 'recepcionista'
-    
+        return get_user_role(request.user) == 'recepcionista'
+
+
 class IsCocinero(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.groups.get().name == 'cocinero'
-    
+        return get_user_role(request.user) == 'cocinero'
+
+
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.groups.get().name == 'admin'
-    
+        return get_user_role(request.user) == 'admin'
+
+
 class IsRecepcionistaOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        role = request.user.groups.get().name
-        return role == 'recepcionista' or role == 'admin'
-    
+        return get_user_role(request.user) in ('recepcionista', 'admin')
+
+
 class IsRecepcionistaOrCocinero(permissions.BasePermission):
     def has_permission(self, request, view):
-        role = request.user.groups.get().name
-        return role == 'recepcionista' or role == 'cocinero' or role == 'admin'
+        return get_user_role(request.user) in ('recepcionista', 'cocinero', 'admin')
