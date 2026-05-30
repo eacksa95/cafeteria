@@ -123,12 +123,24 @@ PENDIENTE → EN_PROCESO → LISTO → ENTREGADO
 - [ ] Botón "Rechazar" con motivo
 - [ ] Auto-refresh cada N segundos (o WebSocket en versión avanzada)
 
-### 3. Carta Digital / Menú Público
-- [ ] Vista pública sin login (ruta `/menu` o `/carta`)
-- [ ] Grid de productos con imagen, nombre, precio, descripción
-- [ ] Filtro por categoría
-- [ ] Diseño de pantalla grande (para tablets sobre mostrador o pantalla tipo McDonald's)
-- [ ] Modo oscuro / modo presentación
+### 3. Carta Digital / Pantallas de TV
+> **Decisión de diseño:** NO se crea un rol para las TVs.
+> Las pantallas de presentación (tipo menú McDonald's, tablets sobre mostrador, etc.)
+> consumen el endpoint público `/api/productos/menu/` — sin login, sin teclado.
+> El dispositivo (TV, tablet en kiosk mode) abre la URL de la ruta `/carta` del frontend.
+> No hay interacción del usuario, solo visualización. Auto-refresh con React Query.
+
+**Backend (ya implementado):**
+- [x] Endpoint público `GET /api/productos/menu/` — sin auth, retorna todos los productos
+
+**Frontend (pendiente):**
+- [ ] Ruta pública `/carta` — no requiere login, accesible sin estado de auth
+- [ ] Grid visual de productos: imagen grande, nombre, precio
+- [ ] Filtro por categoría (tabs o chips)
+- [ ] Auto-refresh cada 60 segundos (`refetchInterval: 60000` en React Query)
+- [ ] Diseño optimizado para pantalla grande (TV 1080p): texto grande, contraste alto
+- [ ] Modo "kiosk": ocultar header/navbar, solo mostrar el grid
+- [ ] Posible: modo carrusel para TVs sin interacción (slideshow de categorías)
 
 ### 4. Carrito y Pedidos
 - [ ] Revisar y testear flujo completo: agregar al carrito → enviar pedido → confirmar
