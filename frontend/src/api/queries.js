@@ -107,9 +107,9 @@ export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, ...user }) => 
+    mutationFn: ({ id, ...user }) =>
       fetchWithAuth(`/users/${id}/`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(user),
       }),
     onSuccess: () => {

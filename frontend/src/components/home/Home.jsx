@@ -12,9 +12,7 @@ import UsuariosNuevo from '../admin/UsuariosNuevo';
 import UsuariosModificar from '../admin/UsuariosModificar';
 import UsuariosTabla from '../admin/UsuariosTabla';
 import { CarritoIndex } from '../carrito/CarritoIndex';
-import PedidosIndex from '../pedidos/PedidosIndex';
-import PedidosListos from '../pedidos/PedidosListos';
-import PedidosPendientes from '../pedidos/PedidosPendientes';
+import Pedidos from '../pedidos/Pedidos';
 import ProductosIndex from '../productos/ProductosIndex';
 import ProductosTabla from '../productos/ProductosTabla';
 import ProductosNuevo from '../productos/ProductosNuevo';
@@ -43,7 +41,7 @@ const Home = ({ onLogout, userId }) => {
     );
   }
 
-  const isAdmin = role === 'admin';
+  const isAdmin        = role === 'admin';
   const canViewProducts = ['mozo', 'cocinero', 'admin'].includes(role);
   const canViewCarrito  = ['mozo', 'admin'].includes(role);
 
@@ -53,40 +51,40 @@ const Home = ({ onLogout, userId }) => {
         <Navbar onLogout={onLogout} role={role} username={user?.username} />
 
         {mostrarMensaje && (
-          <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-amber-800/90 text-amber-100 px-4 py-2 rounded-lg text-sm border border-amber-700 shadow-lg">
+          <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-stone-100 px-4 py-2 rounded-lg text-sm border border-stone-600 shadow-lg">
             {mensaje}
           </div>
         )}
 
         <main className="flex-1">
           <Routes>
-            <Route path="/" element={<Inicio />} />
+            <Route path="/" element={<Inicio role={role} username={user?.username} />} />
             <Route path="/noauth" element={<NoAuth />} />
 
             {/* Todos los autenticados */}
             <Route element={<ProtectedRoute isAllowed={!!user} />}>
-              <Route path="/pedidosindex" element={<PedidosIndex><PedidosPendientes setMensaje={setMensaje} /></PedidosIndex>} />
-              <Route path="/pedidospendientes" element={<PedidosIndex><PedidosPendientes setMensaje={setMensaje} /></PedidosIndex>} />
-              <Route path="/pedidoslistos" element={<PedidosIndex><PedidosListos setMensaje={setMensaje} /></PedidosIndex>} />
+              <Route path="/pedidosindex"    element={<Pedidos setMensaje={setMensaje} />} />
+              <Route path="/pedidospendientes" element={<Pedidos setMensaje={setMensaje} />} />
+              <Route path="/pedidoslistos"   element={<Pedidos setMensaje={setMensaje} />} />
             </Route>
 
-            {/* Mozo + Cocinero + Admin */}
+            {/* Mozo + Cocinero + Admin — Productos */}
             <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && canViewProducts} />}>
               <Route path="/productosindex" element={<ProductosIndex role={role}><ProductosTabla setMensaje={setMensaje} /></ProductosIndex>} />
               <Route path="/productosnuevo" element={<ProductosIndex role={role}><ProductosNuevo setMensaje={setMensaje} role={role} /></ProductosIndex>} />
               <Route path="/productosmodificar/:id" element={<ProductosIndex role={role}><ProductosModificar setMensaje={setMensaje} role={role} /></ProductosIndex>} />
             </Route>
 
-            {/* Mozo + Admin */}
+            {/* Mozo + Admin — Carrito */}
             <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && canViewCarrito} />}>
               <Route path="/carrito" element={<CarritoIndex setMensaje={setMensaje} />} />
             </Route>
 
             {/* Solo Admin */}
             <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!user && isAdmin} />}>
-              <Route path="/admin" element={<AdminIndex><Perfil userId={userId} /></AdminIndex>} />
-              <Route path="/usuariostabla" element={<AdminIndex><UsuariosTabla setMensaje={setMensaje} /></AdminIndex>} />
-              <Route path="/usuariosnuevo" element={<AdminIndex><UsuariosNuevo setMensaje={setMensaje} /></AdminIndex>} />
+              <Route path="/admin"               element={<AdminIndex><Perfil userId={userId} /></AdminIndex>} />
+              <Route path="/usuariostabla"        element={<AdminIndex><UsuariosTabla setMensaje={setMensaje} /></AdminIndex>} />
+              <Route path="/usuariosnuevo"        element={<AdminIndex><UsuariosNuevo setMensaje={setMensaje} /></AdminIndex>} />
               <Route path="/usuariosmodificar/:id" element={<AdminIndex><UsuariosModificar setMensaje={setMensaje} /></AdminIndex>} />
             </Route>
           </Routes>
