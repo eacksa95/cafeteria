@@ -1,6 +1,6 @@
 # Cafetería — Documentación de Desarrollo
 > Documento de trabajo interno. Uso: Ezequiel Cristaldo + Claude (IA).
-> Última actualización: Mayo 2026
+> Última actualización: Mayo 2026 — Roles redefinidos, registro público implementado
 
 ---
 
@@ -50,10 +50,23 @@ PENDIENTE → EN_PROCESO → LISTO → ENTREGADO
 ### Roles del sistema
 | Rol | Descripción | Vistas habilitadas |
 |---|---|---|
-| `admin` | Administrador del local | Todo |
-| `recepcionista` | Mozo / recepción | Menú público, carrito, lista de pedidos |
-| `cocinero` | Cocina | Panel de cocina (tickets) |
-| `cliente` | (futuro) | Solo menú público / carta digital |
+| `admin` | Administrador del local | Todo + gestión de usuarios |
+| `mozo` | Mozo / recepcionista | Carrito (genera pedidos), Gestión Productos (sin precio), Vista Pedidos, Carta digital |
+| `cocinero` | Cocina | Panel Cocina (tickets + acciones de estado), Vista Productos Inventario |
+| `cajero` | Caja | Vista Ventas, Abrir/Cerrar Caja, Vista Pedidos para cobro |
+| `recepcionista` | Alias legacy de `mozo` | Igual que mozo (compatibilidad datos viejos) |
+
+### Matriz de permisos por vista
+| Vista | admin | mozo | cocinero | cajero |
+|---|---|---|---|---|
+| Inicio | ✅ | ✅ | ✅ | ✅ |
+| Pedidos | ✅ | ✅ | ✅ | ✅ |
+| Carrito | ✅ | ✅ | — | — |
+| Productos | ✅ | ✅ | ✅ (solo lectura) | — |
+| Cocina (panel) | ✅ | — | ✅ | — |
+| Caja | ✅ | — | — | ✅ |
+| Admin / Usuarios | ✅ | — | — | — |
+| Carta digital | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -70,23 +83,37 @@ PENDIENTE → EN_PROCESO → LISTO → ENTREGADO
 - [x] CORS restringido al frontend de producción
 - [x] Variables de entorno (MONGO_URI, SECRET_KEY, DEBUG)
 - [x] Fix: `permissions.py` — superusuario y usuario sin grupo no explotan en 500
+- [x] Fix: `UserSerializer.get_group_name` — superusuario retorna 'admin' correctamente
+- [x] Registro público de usuarios (endpoint `/users/register/`)
+- [x] Formulario de registro en frontend con selección de rol
+- [x] Navbar dinámico según rol del usuario
+- [x] Management command `seed_groups` para crear grupos en MongoDB
+- [x] Roles redefinidos: admin, mozo, cocinero, cajero (+ recepcionista legacy)
 
-### 🔧 En proceso / bugs conocidos
-- [ ] Verificar que todos los endpoints CRUD funcionan correctamente en producción
-- [ ] El frontend usa Bootstrap — evaluar migración a Tailwind CSS para coherencia con el resto del portafolio
-- [ ] El ID de usuario en el JWT puede no coincidir con el de MongoDB en algunos casos
+### 🔧 Próximo — primer deploy funcional
+- [ ] **Ejecutar `seed_groups`** en Railway: `railway run python manage.py seed_groups`
+- [ ] **Asignar grupo 'admin' al superusuario** via Django shell o crear usuario nuevo con rol admin
+- [ ] Verificar flujo completo: registro → login → vista según rol
+- [ ] Testear carrito → pedido → panel cocina en producción
+- [ ] Verificar que todos los endpoints CRUD funcionan en producción
+
+### 🔧 Bugs conocidos
+- [ ] Mozo puede modificar precio de productos (restricción pendiente de implementar)
+- [ ] El frontend usa Bootstrap — evaluar migración a Tailwind CSS para coherencia con portafolio
 
 ---
 
 ## Task List — Por módulo
 
 ### 1. Sistema de Roles y Menús dinámicos
-- [ ] Implementar menú de navegación dinámico según rol del usuario logueado
-- [ ] Vista de administración: acceso a usuarios, productos, reportes
-- [ ] Vista de recepcionista/mozo: solo carrito y estado de pedidos
-- [ ] Vista de cocinero: solo panel de cocina
-- [ ] Crear grupos de Django automáticamente con un management command (`python manage.py seed_groups`)
-- [ ] Asignar rol al crear usuario (form en admin)
+- [x] Navbar dinámico según rol
+- [x] Registro público con selección de rol
+- [x] Management command `seed_groups`
+- [ ] Ejecutar `seed_groups` en Railway (pendiente)
+- [ ] Vista de inicio personalizada por rol (dashboard diferente por rol)
+- [ ] Página de perfil del usuario (ver y editar sus propios datos)
+- [ ] Admin puede cambiar el rol de cualquier usuario desde la vista de usuarios
+- [ ] Restricción: mozo no puede modificar precio de producto
 
 ### 2. Panel de Cocina
 - [ ] Vista "Cocina" — lista de pedidos en tiempo real
@@ -121,11 +148,17 @@ PENDIENTE → EN_PROCESO → LISTO → ENTREGADO
 - [ ] Vista de pedidos del día (tabla con filtros)
 - [ ] Estadísticas básicas: pedidos del día, productos más vendidos
 
-### 7. Facturación / Caja
-- [ ] Generar ticket/comprobante del pedido (PDF o vista imprimible)
-- [ ] Registrar método de pago
-- [ ] Cierre de caja del turno
-- [ ] Reporte de ventas por fecha, producto, mozo
+### 7. Módulo Cajero / Caja
+> **Decisión: sí se implementa en Cafetería.** La caja es parte del flujo operativo del local.
+> Genesis se integra después para contabilidad/impuestos.
+- [ ] Vista Caja: estado del turno (abierto/cerrado)
+- [ ] Acción "Abrir turno" con hora y cajero registrado
+- [ ] Lista de pedidos listos para cobro (estado LISTO)
+- [ ] Acción "Cobrar pedido": seleccionar método de pago (efectivo/tarjeta), marcar como PAGADO
+- [ ] Generar ticket/comprobante imprimible (HTML → print o PDF)
+- [ ] Acción "Cerrar turno" con resumen: total recaudado, cant. pedidos, desglose por método de pago
+- [ ] Nuevo endpoint backend: `PATCH /pedidos/{id}/cobrar/`
+- [ ] Nuevo estado de pedido: `PAGADO` (después de ENTREGADO)
 
 ### 8. Reportes
 - [ ] Ventas por período (día, semana, mes)
