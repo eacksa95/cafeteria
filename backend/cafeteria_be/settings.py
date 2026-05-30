@@ -12,7 +12,12 @@ SECRET_KEY = os.environ.get(
     'django-insecure-=u#gcv7_9^9ny0h_a489n#3h06wb@%h=c8_5%88+hi)mwn(a3q'
 )
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+# En producción idealmente restringir al dominio exacto de Railway:
+# ALLOWED_HOSTS = ['cafeteria-production-c6ba.up.railway.app', 'localhost', '127.0.0.1']
+# Por ahora ['*'] es aceptable porque CORS_ALLOWED_ORIGINS ya restringe el acceso desde navegadores.
 ALLOWED_HOSTS = ['*']
+
 APPEND_SLASH = False
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -107,6 +112,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8001',
 ]
+# Habilitar si en algún momento se usan cookies httpOnly junto con JWT
+# (ej: refresh token en cookie segura en lugar de localStorage)
+# CORS_ALLOW_CREDENTIALS = True
 
 # ── Internacionalización ───────────────────────────────────────────────────────
 LANGUAGE_CODE = 'es-es'
