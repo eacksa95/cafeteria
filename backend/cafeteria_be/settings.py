@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
-# ── Seguridad — valores desde variables de entorno ────────────────────────────
+# ── Seguridad ─────────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-=u#gcv7_9^9ny0h_a489n#3h06wb@%h=c8_5%88+hi)mwn(a3q'
 )
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ['*']
+APPEND_SLASH = False
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -87,10 +88,7 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'db_cafeteria',
         'CLIENT': {
-            'host': os.environ.get(
-                'MONGO_URI',
-                'mongodb+srv://eacksa95:7kAQA10dAiXkokBX@cluster0.gzsjnl8.mongodb.net/?retryWrites=true&w=majority'
-            )
+            'host': os.environ.get('MONGO_URI', '')
         }
     }
 }
@@ -102,7 +100,13 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=10)
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+# ── CORS — solo orígenes conocidos ────────────────────────────────────────────
+CORS_ALLOWED_ORIGINS = [
+    'https://cafeteria-fe.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:8001',
+]
 
 # ── Internacionalización ───────────────────────────────────────────────────────
 LANGUAGE_CODE = 'es-es'
