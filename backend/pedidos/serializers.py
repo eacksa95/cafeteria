@@ -2,13 +2,41 @@ from rest_framework import serializers
 from .models import Pedido
 import json
 
-class PedidoSerializer(serializers.ModelSerializer):    
+
+class JSONStringField(serializers.Field):
+    """Almacena como string JSON en MongoDB, expone como lista Python."""
+
+    def to_representation(self, value):
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return value if value is not None else []
+
+    def to_internal_value(self, data):
+        if isinstance(data, (list, dict)):
+            return json.dumps(data)
+        if isinstance(data, str):
+            try:
+                json.loads(data)
+                return data
+            except json.JSONDecodeError:
+                raise serializers.ValidationError('JSON inválido')
+        return json.dumps([])
+
+
+class PedidoSerializer(serializers.ModelSerializer):
+    lista_productos = JSONStringField()
+    lista_cantidad  = JSONStringField()
+
     class Meta:
         model = Pedido
-        fields = ['id', 'cliente', 'mesa', 'lista_productos', 'lista_cantidad', 'monto', 'estado', 'fecha_recepcion', 'hora_recepcion', 'hora_listo', 'hora_entregado']
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['lista_productos'] = json.loads(representation['lista_productos'])
-        representation['lista_cantidad'] = json.loads(representation['lista_cantidad'])
-        return representation
+        fields = [
+            'id', 'cliente', 'mesa',
+            'lista_productos', 'lista_cantidad',
+            'monto', 'estado',
+            'fecha_recepcion', 'hora_recepcion',
+            'hora_listo', 'hora_entregado',
+        ]
+        read_only_fields = ['fecha_recepcion', 'hora_recepcion']

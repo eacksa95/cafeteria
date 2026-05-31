@@ -13,10 +13,24 @@ const ProductosModificar = ({ setMensaje, role }) => {
   const updateMutation = useUpdateProducto();
   const isAdmin = role === 'admin';
 
-  const [form, setForm] = useState({ nombre: '', precio: '', cantidad: 1, img: IMG_DEFAULT });
+  const CATS = [
+    { value: 'cafe',     label: 'Cafés y calientes' },
+    { value: 'bebida',   label: 'Bebidas frías' },
+    { value: 'desayuno', label: 'Desayunos' },
+    { value: 'comida',   label: 'Comidas' },
+    { value: 'postre',   label: 'Postres' },
+    { value: 'otro',     label: 'Otro' },
+  ];
+  const [form, setForm] = useState({ nombre: '', precio: '', cantidad: 1, img: '', categoria: 'otro' });
 
   useEffect(() => {
-    if (producto) setForm({ nombre: producto.nombre || '', precio: producto.precio || '', cantidad: producto.cantidad || 1, img: producto.img || IMG_DEFAULT });
+    if (producto) setForm({
+      nombre:    producto.nombre    || '',
+      precio:    producto.precio    || '',
+      cantidad:  producto.cantidad  || 1,
+      img:       producto.img       || '',
+      categoria: producto.categoria || 'otro',
+    });
   }, [producto]);
 
   const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -55,7 +69,10 @@ const ProductosModificar = ({ setMensaje, role }) => {
           )}
         </div>
 
-        <input className="input-base" name="img" placeholder="URL imagen" value={form.img} onChange={handle} />
+        <select className="input-base" name="categoria" value={form.categoria} onChange={handle}>
+          {CATS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+        </select>
+        <input className="input-base" name="img" placeholder="URL imagen (opcional)" value={form.img} onChange={handle} />
 
         {form.img && (
           <img src={form.img} alt="preview" className="w-20 h-20 rounded-lg object-cover border border-stone-700"

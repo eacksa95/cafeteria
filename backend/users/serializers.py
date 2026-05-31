@@ -41,10 +41,6 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         if group_name:
-            try:
-                instance.groups.clear()
-                group = Group.objects.get(name=group_name)
-                instance.groups.add(group)
-            except Group.DoesNotExist:
-                pass
+            group, _ = Group.objects.get_or_create(name=group_name)
+            instance.groups.set([group])
         return instance

@@ -239,7 +239,7 @@ export const useUpdatePedido = () => {
   return useMutation({
     mutationFn: ({ id, ...pedido }) =>
       fetchWithAuth(`/pedidos/${id}/`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(pedido),
       }),
     onSuccess: () => {
