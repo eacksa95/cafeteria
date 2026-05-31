@@ -8,7 +8,7 @@ const ROLE_BADGE = {
   mozo:     'bg-blue-900/60 text-blue-400 border-blue-700',
   cocinero: 'bg-orange-900/60 text-orange-400 border-orange-700',
   cajero:   'bg-emerald-900/60 text-emerald-400 border-emerald-700',
-}
+};
 
 const NAV_LINKS = [
   { to: '/',               label: 'Inicio',    roles: null },
@@ -16,7 +16,7 @@ const NAV_LINKS = [
   { to: '/carrito',        label: 'Carrito',   roles: ['mozo', 'admin'] },
   { to: '/productosindex', label: 'Productos', roles: ['mozo', 'cocinero', 'admin'] },
   { to: '/admin',          label: 'Admin',     roles: ['admin'] },
-]
+];
 
 const Navbar = ({ onLogout, role, username }) => {
   const [open, setOpen] = useState(false);
@@ -26,7 +26,7 @@ const Navbar = ({ onLogout, role, username }) => {
 
   return (
     <nav className="sticky top-0 z-40 bg-stone-900 border-b border-stone-800">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="relative max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
 
           {/* Logo */}
@@ -50,7 +50,7 @@ const Navbar = ({ onLogout, role, username }) => {
             ))}
           </div>
 
-          {/* Logout (desktop) + hamburger */}
+          {/* Right: logout + hamburger */}
           <div className="flex items-center gap-2">
             {username && <span className="hidden md:inline text-stone-500 text-xs">{username}</span>}
             <button onClick={onLogout}
@@ -58,23 +58,24 @@ const Navbar = ({ onLogout, role, username }) => {
               <FontAwesomeIcon icon={faRightFromBracket} size="sm" />
               Salir
             </button>
-            <button onClick={() => setOpen(v => !v)} className="md:hidden text-stone-400 p-2">
+            <button onClick={() => setOpen(v => !v)} className="md:hidden text-stone-400 p-2 rounded-lg hover:bg-stone-800">
               <FontAwesomeIcon icon={open ? faTimes : faBars} />
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu — absolute, no desplaza contenido */}
         {open && (
-          <div className="md:hidden border-t border-stone-800 py-2 space-y-0.5">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-stone-900 border-b border-stone-800 shadow-xl z-50 py-2">
             {visible.map(l => (
               <Link key={l.to} to={l.to} onClick={close}
-                className="block text-stone-300 hover:text-amber-400 hover:bg-stone-800 px-3 py-2 rounded-lg text-sm transition-colors">
+                className="flex items-center text-stone-300 hover:text-amber-400 hover:bg-stone-800 px-4 py-3 text-sm transition-colors">
                 {l.label}
               </Link>
             ))}
+            <div className="mx-4 my-2 border-t border-stone-800" />
             <button onClick={onLogout}
-              className="flex items-center gap-2 text-red-400 px-3 py-2 text-sm w-full">
+              className="flex items-center gap-2 text-red-400 hover:bg-stone-800 px-4 py-3 text-sm w-full transition-colors">
               <FontAwesomeIcon icon={faRightFromBracket} size="sm" />
               Cerrar sesión
             </button>

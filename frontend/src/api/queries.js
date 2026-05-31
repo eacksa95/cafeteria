@@ -20,6 +20,15 @@ const fetchWithAuth = async (url, options = {}) => {
   return response.json();
 };
 
+/* CATEGORÍAS — público, no requiere auth */
+export const useCategorias = () => {
+  return useQuery({
+    queryKey: ['categorias'],
+    queryFn: () => fetch(`${API_URL}/categorias/`).then(r => r.json()),
+    staleTime: 10 * 60 * 1000,
+  });
+};
+
 /*LOGIN QUERY*/
 
 export const useRegister = () => {
