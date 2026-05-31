@@ -43,8 +43,12 @@ class ProductosViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny], url_path='menu')
     def menu(self, request):
-        """Endpoint público: productos disponibles para carta digital."""
-        productos = Producto.objects.filter(disponible=True)
+        """Endpoint público: productos disponibles para carta digital.
+        Usa exclude(disponible=False) para incluir docs sin el campo (datos legacy)."""
+        try:
+            productos = Producto.objects.exclude(disponible=False)
+        except Exception:
+            productos = Producto.objects.all()
         serializer = self.get_serializer(productos, many=True)
         return Response(serializer.data)
 

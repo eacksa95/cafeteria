@@ -1,13 +1,12 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faTimes, faMugHot, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faMugHot, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 const ROLE_BADGE = {
-  admin:    'bg-amber-900/60 text-amber-400 border-amber-700',
-  mozo:     'bg-blue-900/60 text-blue-400 border-blue-700',
-  cocinero: 'bg-orange-900/60 text-orange-400 border-orange-700',
-  cajero:   'bg-emerald-900/60 text-emerald-400 border-emerald-700',
+  admin:    'bg-amber-200 text-amber-900 border-amber-300',
+  mozo:     'bg-sky-100 text-sky-800 border-sky-200',
+  cocinero: 'bg-orange-100 text-orange-800 border-orange-200',
+  cajero:   'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
 const NAV_LINKS = [
@@ -18,71 +17,58 @@ const NAV_LINKS = [
   { to: '/admin',          label: 'Admin',     roles: ['admin'] },
 ];
 
-const Navbar = ({ onLogout, role, username }) => {
-  const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+const Navbar = ({ onLogout, role, username, title }) => {
   const visible = NAV_LINKS.filter(l => !l.roles || l.roles.includes(role));
-  const badge = ROLE_BADGE[role] || 'bg-stone-800 text-stone-400 border-stone-700';
+  const badge   = ROLE_BADGE[role] || 'bg-stone-100 text-stone-600 border-stone-200';
 
   return (
-    <nav className="sticky top-0 z-40 bg-stone-900 border-b border-stone-800">
-      <div className="relative max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14">
+    <header className="sticky top-0 z-40 bg-amber-900 border-b border-amber-800">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4">
+        <div className="flex items-center justify-between h-12">
 
-          {/* Logo */}
+          {/* Logo + title */}
           <div className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faMugHot} className="text-amber-500" />
-            <span className="font-bold text-stone-100 text-sm">Coffee Shop</span>
-            {role && (
-              <span className={`hidden sm:inline px-2 py-0.5 rounded-full text-[10px] border font-medium ${badge}`}>
-                {role}
+            <FontAwesomeIcon icon={faMugHot} className="text-amber-300 text-sm" />
+            <span className="font-bold text-amber-50 text-sm hidden sm:inline">Coffee Shop</span>
+            {title && (
+              <span className="text-amber-300 text-sm font-medium">
+                <span className="text-amber-700 mx-1.5 hidden sm:inline">·</span>
+                {title}
               </span>
             )}
           </div>
 
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop nav links */}
+          <nav className="hidden md:flex items-center gap-0.5">
             {visible.map(l => (
               <Link key={l.to} to={l.to}
-                className="text-stone-400 hover:text-amber-400 hover:bg-stone-800 px-3 py-1.5 rounded-lg text-sm transition-colors">
+                className="text-amber-200 hover:text-white hover:bg-amber-800 px-3 py-1.5 rounded-md text-sm transition-colors">
                 {l.label}
               </Link>
             ))}
-          </div>
+          </nav>
 
-          {/* Right: logout + hamburger */}
+          {/* Right: user info + logout */}
           <div className="flex items-center gap-2">
-            {username && <span className="hidden md:inline text-stone-500 text-xs">{username}</span>}
+            {username && (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-amber-600 text-amber-50 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {username[0]?.toUpperCase()}
+                </div>
+                <span className={`hidden sm:inline px-2 py-0.5 rounded-full text-[10px] border font-medium ${badge}`}>
+                  {role}
+                </span>
+              </div>
+            )}
             <button onClick={onLogout}
-              className="hidden md:flex items-center gap-1.5 text-stone-400 hover:text-red-400 text-sm px-3 py-1.5 rounded-lg hover:bg-stone-800 transition-colors">
+              className="flex items-center gap-1 text-amber-300 hover:text-white text-sm px-2 py-1.5 rounded-md hover:bg-amber-800 transition-colors">
               <FontAwesomeIcon icon={faRightFromBracket} size="sm" />
-              Salir
-            </button>
-            <button onClick={() => setOpen(v => !v)} className="md:hidden text-stone-400 p-2 rounded-lg hover:bg-stone-800">
-              <FontAwesomeIcon icon={open ? faTimes : faBars} />
+              <span className="hidden md:inline text-xs">Salir</span>
             </button>
           </div>
         </div>
-
-        {/* Mobile menu — absolute, no desplaza contenido */}
-        {open && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-stone-900 border-b border-stone-800 shadow-xl z-50 py-2">
-            {visible.map(l => (
-              <Link key={l.to} to={l.to} onClick={close}
-                className="flex items-center text-stone-300 hover:text-amber-400 hover:bg-stone-800 px-4 py-3 text-sm transition-colors">
-                {l.label}
-              </Link>
-            ))}
-            <div className="mx-4 my-2 border-t border-stone-800" />
-            <button onClick={onLogout}
-              className="flex items-center gap-2 text-red-400 hover:bg-stone-800 px-4 py-3 text-sm w-full transition-colors">
-              <FontAwesomeIcon icon={faRightFromBracket} size="sm" />
-              Cerrar sesión
-            </button>
-          </div>
-        )}
       </div>
-    </nav>
+    </header>
   );
 };
 

@@ -31,7 +31,7 @@ function App() {
   const onLogoutHandler = () => { setUserId(null); window.localStorage.removeItem('accessToken') }
 
   return (
-    <div className="min-h-screen bg-stone-950">
+    <div className="min-h-screen bg-amber-50">
       {userId ? (
         <Home onLogout={onLogoutHandler} userId={userId} />
       ) : showRegister ? (

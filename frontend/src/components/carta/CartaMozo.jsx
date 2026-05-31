@@ -56,8 +56,9 @@ export default function CartaMozo() {
   const total  = cart.reduce((s, i) => s + Number(i.precio) * i.qty, 0);
   const count  = cart.reduce((s, i) => s + i.qty, 0);
 
+  // Filtrar por categoria_id — Number() para comparar correctamente
   const filtrados = catActiva
-    ? productos.filter(p => p.categoria_id === catActiva)
+    ? productos.filter(p => Number(p.categoria_id) === catActiva)
     : productos;
 
   const handleEnviar = async () => {

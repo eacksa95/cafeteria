@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { useCreateProducto } from '../../api/queries';
-
-const IMG_DEFAULT = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
+import CloudinaryUpload from '../common/CloudinaryUpload';
 
 const ProductosNuevo = ({ setMensaje, role }) => {
   const navigate = useNavigate();
@@ -58,7 +57,8 @@ const ProductosNuevo = ({ setMensaje, role }) => {
         <select className="input-base" name="categoria" value={form.categoria} onChange={handle}>
           {CATS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
-        <input className="input-base" name="img" placeholder="URL imagen (opcional)" value={form.img} onChange={handle} />
+        <input className="input-base" name="img" placeholder="URL imagen (opcional, o subí abajo)" value={form.img} onChange={handle} />
+        <CloudinaryUpload currentUrl={form.img} onUpload={url => setForm(p => ({ ...p, img: url }))} />
 
         {form.img && (
           <img src={form.img} alt="preview" className="w-20 h-20 rounded-lg object-cover border border-stone-700"
