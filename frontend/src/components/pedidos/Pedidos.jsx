@@ -27,7 +27,7 @@ function getElapsedMin(horaStr) {
     const then = new Date();
     then.setHours(h, m, s || 0, 0);
     const diff = Math.floor((now - then) / 60000);
-    return diff < 0 ? diff + 1440 : diff; // manejo de medianoche
+    return diff < 0 ? diff + 1440 : diff;
   } catch { return 0; }
 }
 
@@ -59,20 +59,25 @@ function getCardStyle(estado, mins) {
 }
 
 const NEXT = {
-  pendiente:  { state: 'en_proceso', label: 'Iniciar',   timeKey: null },
-  en_proceso: { state: 'listo',      label: '✓ Listo',   timeKey: 'hora_listo' },
+  pendiente:  { state: 'en_proceso', label: 'Iniciar',    timeKey: null },
+  en_proceso: { state: 'listo',      label: '✓ Listo',    timeKey: 'hora_listo' },
   listo:      { state: 'entregado',  label: '↗ Entregar', timeKey: 'hora_entregado' },
 };
 
-// ── Modal detalle (también tiene botón eliminar) ──────────────────────────────
-function DetalleModal({ pedido, productos, onClose, onDelete }) {
-  if (!pedido) return null;
+// ── Helper de productos para modales ──────────────────────────────────────────
+function buildProductLines(pedido, productos) {
   const ids   = toList(pedido.lista_productos);
   const cants = toList(pedido.lista_cantidad);
-  const nombres = ids.map(id => {
+  return ids.map((id, i) => {
     const p = productos?.find(p => Number(p.id) === Number(id));
-    return p ? p.nombre : `#${id}`;
+    return { nombre: p ? p.nombre : `#${id}`, cant: cants[i] };
   });
+}
+
+// ── Modal: Ver detalle ────────────────────────────────────────────────────────
+function DetalleModal({ pedido, productos, onClose, onDelete }) {
+  if (!pedido) return null;
+  const lines = buildProductLines(pedido, productos);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
@@ -88,14 +93,14 @@ function DetalleModal({ pedido, productos, onClose, onDelete }) {
             <div key={k}><dt className="text-stone-400 text-xs">{k}</dt><dd className="text-stone-800 font-medium text-xs">{v}</dd></div>
           ))}
         </dl>
-        {nombres.length > 0 && (
+        {lines.length > 0 && (
           <div className="border-t border-amber-100 pt-2 mb-3">
             <p className="text-stone-400 text-[10px] uppercase tracking-wide mb-1">Productos</p>
             <ul className="space-y-0.5">
-              {nombres.map((n, i) => (
+              {lines.map(({ nombre, cant }, i) => (
                 <li key={i} className="text-stone-700 text-xs flex items-center gap-1.5">
-                  <span className="text-amber-500">·</span> {n}
-                  {cants[i] != null && <span className="text-stone-400">×{cants[i]}</span>}
+                  <span className="text-amber-500">·</span> {nombre}
+                  {cant != null && <span className="text-stone-400">×{cant}</span>}
                 </li>
               ))}
             </ul>
@@ -110,31 +115,83 @@ function DetalleModal({ pedido, productos, onClose, onDelete }) {
   );
 }
 
+// ── Modal: Confirmar Iniciar ──────────────────────────────────────────────────
+function IniciarDialog({ pedido, productos, onClose, onConfirm, busy }) {
+  if (!pedido) return null;
+  const lines = buildProductLines(pedido, productos);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/30" />
+      <div className="relative bg-white rounded-2xl border border-orange-100 shadow-2xl p-5 max-w-xs w-full" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-orange-800">Pedido #{pedido.id} · Mesa {pedido.mesa}</h3>
+          <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+        <dl className="grid grid-cols-2 gap-y-1.5 mb-3">
+          {[['Cliente', pedido.cliente], ['Total', `$${pedido.monto}`], ['Recibido', fmtHora(pedido.hora_recepcion)], ['Mesa', pedido.mesa]].map(([k, v]) => (
+            <div key={k}><dt className="text-stone-400 text-xs">{k}</dt><dd className="text-stone-800 font-medium text-xs">{v}</dd></div>
+          ))}
+        </dl>
+        {lines.length > 0 && (
+          <div className="border-t border-orange-100 pt-2 mb-4">
+            <p className="text-stone-400 text-[10px] uppercase tracking-wide mb-1.5">Productos</p>
+            <ul className="space-y-1">
+              {lines.map(({ nombre, cant }, i) => (
+                <li key={i} className="text-stone-700 text-xs flex items-center gap-1.5">
+                  <span className="text-orange-400">·</span> {nombre}
+                  {cant != null && <span className="text-stone-400">×{cant}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="flex gap-2 mt-1">
+          <button onClick={onClose}
+            className="flex-1 border border-stone-200 text-stone-500 hover:bg-stone-50 rounded-lg py-2 text-xs font-medium transition-colors">
+            Cancelar
+          </button>
+          <button onClick={onConfirm} disabled={busy}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-2 text-xs font-bold transition-colors disabled:opacity-40">
+            Iniciar pedido
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Mini card ─────────────────────────────────────────────────────────────────
-function MiniCard({ pedido, onAdvance, onVer, productos, busy }) {
+function MiniCard({ pedido, onAdvance, onIniciar, onVer, productos, busy }) {
   const mins  = getElapsedMin(pedido.hora_recepcion);
   const style = getCardStyle(pedido.estado, mins);
   const next  = NEXT[pedido.estado];
   const prods = getProdDisplay(pedido.lista_productos, productos);
 
+  const handleAction = () => {
+    if (next.state === 'en_proceso') {
+      onIniciar(pedido);
+    } else {
+      onAdvance(pedido, next);
+    }
+  };
+
   return (
     <div className={`rounded-lg border-2 ${style.wrap} p-1.5 flex flex-col gap-1 min-w-0`}>
-      {/* Mesa + timer */}
       <div className="flex items-center justify-between leading-none">
         <span className="text-[11px] font-black text-stone-800 truncate">M{pedido.mesa}</span>
         <span className={`text-[9px] font-bold tabular-nums ${style.timer}`}>{mins}m</span>
       </div>
 
-      {/* Productos (emojis o conteo) */}
       <p className="text-[11px] leading-none text-stone-600 truncate" title={`Pedido #${pedido.id}`}>
         {prods || <span className="text-stone-400">#{pedido.id}</span>}
       </p>
 
-      {/* Botones de acción */}
       {next && (
         <div className="flex gap-0.5 mt-auto">
           <button
-            onClick={() => onAdvance(pedido, next)}
+            onClick={handleAction}
             disabled={busy}
             className={`flex-1 text-[9px] font-semibold py-0.5 rounded ${style.action} transition-colors disabled:opacity-40 truncate px-0.5`}
           >
@@ -153,13 +210,18 @@ function MiniCard({ pedido, onAdvance, onVer, productos, busy }) {
   );
 }
 
-// ── Status chip ───────────────────────────────────────────────────────────────
-function StatusChip({ label, count, color }) {
+// ── Pill filtro ───────────────────────────────────────────────────────────────
+function FilterPill({ label, count, color, active, onClick }) {
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${color}`}>
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-all
+        ${color}
+        ${active ? 'ring-2 ring-offset-1 ring-current shadow-sm scale-105' : 'opacity-60 hover:opacity-90'}`}
+    >
       <span className="font-black text-sm leading-none">{count}</span>
       {label}
-    </span>
+    </button>
   );
 }
 
@@ -169,7 +231,9 @@ const Pedidos = ({ setMensaje }) => {
   const { data: productos } = useProductos();
   const updatePedido = useUpdatePedido();
   const deletePedido = useDeletePedido();
-  const [detalle, setDetalle] = useState(null);
+  const [detalle,   setDetalle]   = useState(null);
+  const [iniciando, setIniciando] = useState(null);
+  const [filtro,    setFiltro]    = useState('todos');
 
   const onAdvance = async (pedido, next) => {
     try {
@@ -177,6 +241,15 @@ const Pedidos = ({ setMensaje }) => {
       if (next.timeKey) update[next.timeKey] = new Date().toLocaleTimeString([], { hour12: false });
       await updatePedido.mutateAsync(update);
       setMensaje(`Mesa ${pedido.mesa} → ${next.label}`);
+    } catch { setMensaje('Error al actualizar'); }
+  };
+
+  const confirmarIniciar = async () => {
+    const pedido = iniciando;
+    setIniciando(null);
+    try {
+      await updatePedido.mutateAsync({ id: pedido.id, estado: 'en_proceso' });
+      setMensaje(`Mesa ${pedido.mesa} → En proceso`);
     } catch { setMensaje('Error al actualizar'); }
   };
 
@@ -189,30 +262,47 @@ const Pedidos = ({ setMensaje }) => {
   if (isLoading) return <p className="state-loading">Cargando pedidos...</p>;
   if (error)    return <p className="state-error">Error al cargar pedidos</p>;
 
-  const busy   = updatePedido.isPending || deletePedido.isPending;
+  const busy    = updatePedido.isPending || deletePedido.isPending;
   const activos = (pedidos || []).filter(p => !['entregado', 'rechazado'].includes(p.estado));
 
-  // Ordenar: pendientes con más tiempo primero (urgentes), luego en_proceso, luego listos
+  // Ordenar: pendientes primero (urgentes primero), en_proceso, luego listos
   const sorted = [...activos].sort((a, b) => {
     const order = { pendiente: 0, en_proceso: 1, listo: 2 };
     if (order[a.estado] !== order[b.estado]) return order[a.estado] - order[b.estado];
     return getElapsedMin(b.hora_recepcion) - getElapsedMin(a.hora_recepcion);
   });
 
+  const filtrados = filtro === 'todos' ? sorted : sorted.filter(p => p.estado === filtro);
+
   const counts = {
+    todos:      activos.length,
     pendiente:  activos.filter(p => p.estado === 'pendiente').length,
     en_proceso: activos.filter(p => p.estado === 'en_proceso').length,
     listo:      activos.filter(p => p.estado === 'listo').length,
   };
 
+  const pills = [
+    { key: 'todos',      label: 'Todos',      color: 'bg-stone-100 text-stone-700 border-stone-300' },
+    { key: 'pendiente',  label: 'Pendiente',  color: 'bg-amber-100 text-amber-800 border-amber-200' },
+    { key: 'en_proceso', label: 'En proceso', color: 'bg-orange-100 text-orange-800 border-orange-200' },
+    { key: 'listo',      label: 'Listos',     color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  ];
+
   return (
     <div className="px-2 pt-2 pb-1 sm:px-3 sm:pt-3">
 
-      {/* Barra de estado + leyenda */}
+      {/* Pills filtrables */}
       <div className="flex items-center gap-1.5 flex-wrap mb-2">
-        <StatusChip label="Pendiente"  count={counts.pendiente}  color="bg-amber-100 text-amber-800 border-amber-200" />
-        <StatusChip label="En proceso" count={counts.en_proceso} color="bg-orange-100 text-orange-800 border-orange-200" />
-        <StatusChip label="Listos"     count={counts.listo}      color="bg-emerald-100 text-emerald-800 border-emerald-200" />
+        {pills.map(p => (
+          <FilterPill
+            key={p.key}
+            label={p.label}
+            count={counts[p.key]}
+            color={p.color}
+            active={filtro === p.key}
+            onClick={() => setFiltro(p.key)}
+          />
+        ))}
         <div className="flex-1" />
         {/* Leyenda de tiempo */}
         <div className="hidden xs:flex items-center gap-2 text-[9px] text-stone-400">
@@ -224,24 +314,38 @@ const Pedidos = ({ setMensaje }) => {
 
       {/* Grid de mini-cards */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1.5">
-        {sorted.map(p => (
+        {filtrados.map(p => (
           <MiniCard
             key={p.id}
             pedido={p}
             onAdvance={onAdvance}
+            onIniciar={setIniciando}
             onVer={setDetalle}
             productos={productos}
             busy={busy}
           />
         ))}
-        {!sorted.length && (
+        {!filtrados.length && (
           <p className="col-span-full text-center text-stone-400 text-sm py-16">
-            Sin pedidos activos
+            {filtro === 'todos' ? 'Sin pedidos activos' : `Sin pedidos ${pills.find(p => p.key === filtro)?.label.toLowerCase()}`}
           </p>
         )}
       </div>
 
-      <DetalleModal pedido={detalle} productos={productos} onClose={() => setDetalle(null)} onDelete={onDelete} />
+      <DetalleModal
+        pedido={detalle}
+        productos={productos}
+        onClose={() => setDetalle(null)}
+        onDelete={onDelete}
+      />
+
+      <IniciarDialog
+        pedido={iniciando}
+        productos={productos}
+        onClose={() => setIniciando(null)}
+        onConfirm={confirmarIniciar}
+        busy={busy}
+      />
     </div>
   );
 };
