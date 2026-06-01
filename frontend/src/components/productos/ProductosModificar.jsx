@@ -5,7 +5,14 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { useProducto, useUpdateProducto } from '../../api/queries';
 import CloudinaryUpload from '../common/CloudinaryUpload';
 
-const IMG_DEFAULT = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
+const CATS = [
+  { value: 'cafe',     label: 'Cafés y calientes' },
+  { value: 'bebida',   label: 'Bebidas frías' },
+  { value: 'desayuno', label: 'Desayunos' },
+  { value: 'comida',   label: 'Comidas' },
+  { value: 'postre',   label: 'Postres' },
+  { value: 'otro',     label: 'Otro' },
+];
 
 const ProductosModificar = ({ setMensaje, role }) => {
   const { id } = useParams();
@@ -14,14 +21,6 @@ const ProductosModificar = ({ setMensaje, role }) => {
   const updateMutation = useUpdateProducto();
   const isAdmin = role === 'admin';
 
-  const CATS = [
-    { value: 'cafe',     label: 'Cafés y calientes' },
-    { value: 'bebida',   label: 'Bebidas frías' },
-    { value: 'desayuno', label: 'Desayunos' },
-    { value: 'comida',   label: 'Comidas' },
-    { value: 'postre',   label: 'Postres' },
-    { value: 'otro',     label: 'Otro' },
-  ];
   const [form, setForm] = useState({ nombre: '', precio: '', cantidad: 1, img: '', categoria: 'otro' });
 
   useEffect(() => {
@@ -51,20 +50,22 @@ const ProductosModificar = ({ setMensaje, role }) => {
 
   return (
     <div className="card max-w-md">
-      <h3 className="text-lg font-semibold text-stone-100 mb-1">Modificar Producto</h3>
-      <p className="text-stone-400 text-sm mb-5">Actualizá los datos de <span className="text-amber-400">{producto?.nombre}</span></p>
+      <h3 className="text-base font-semibold text-stone-800 mb-1">Modificar Producto</h3>
+      <p className="text-stone-400 text-sm mb-4">
+        Actualizá: <span className="text-amber-700 font-medium">{producto?.nombre}</span>
+      </p>
 
       <form onSubmit={submit} className="space-y-3">
         <input className="input-base" name="nombre" placeholder="Nombre *" required value={form.nombre} onChange={handle} />
 
         <div className="relative">
           <input
-            className={`input-base ${!isAdmin ? 'opacity-60 cursor-not-allowed bg-stone-800/50' : ''}`}
+            className={`input-base ${!isAdmin ? 'opacity-60 cursor-not-allowed' : ''}`}
             name="precio" placeholder="Precio" type="number" step="0.01" min="0"
             value={form.precio} onChange={handle} disabled={!isAdmin}
           />
           {!isAdmin && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-stone-500 text-xs">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-stone-400 text-xs">
               <FontAwesomeIcon icon={faLock} size="xs" /> Solo admin
             </div>
           )}
@@ -73,13 +74,12 @@ const ProductosModificar = ({ setMensaje, role }) => {
         <select className="input-base" name="categoria" value={form.categoria} onChange={handle}>
           {CATS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
-        <input className="input-base" name="img" placeholder="URL imagen (opcional, o subí abajo)" value={form.img} onChange={handle} />
-        <CloudinaryUpload currentUrl={form.img} onUpload={url => setForm(p => ({ ...p, img: url }))} />
 
-        {form.img && (
-          <img src={form.img} alt="preview" className="w-20 h-20 rounded-lg object-cover border border-stone-700"
-            onError={e => { e.target.src = IMG_DEFAULT; }} />
-        )}
+        <CloudinaryUpload
+          currentUrl={form.img}
+          onUpload={url => setForm(p => ({ ...p, img: url }))}
+          onRemove={() => setForm(p => ({ ...p, img: '' }))}
+        />
 
         <button type="submit" className="btn-primary w-full" disabled={updateMutation.isLoading}>
           {updateMutation.isLoading ? 'Guardando...' : 'Guardar cambios'}

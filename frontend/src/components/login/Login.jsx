@@ -31,26 +31,26 @@ const Login = ({ onLogin, onRegister }) => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-amber-50 flex items-center justify-center px-4">
       {error && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-900/90 text-red-200 px-4 py-2 rounded-lg text-sm border border-red-800 shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm border border-red-200 shadow-sm">
           {error}
         </div>
       )}
 
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-600/20 rounded-2xl mb-4 border border-amber-600/30">
-            <FontAwesomeIcon icon={faMugHot} className="text-amber-500 text-2xl" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-2xl mb-4 border border-amber-200">
+            <FontAwesomeIcon icon={faMugHot} className="text-amber-700 text-2xl" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-100">Coffee Shop</h1>
+          <h1 className="text-2xl font-bold text-stone-800">Coffee Shop</h1>
           <p className="text-stone-500 text-sm mt-1">Sistema de gestión</p>
         </div>
 
-        <div className="bg-stone-900 rounded-2xl border border-stone-800 p-8 shadow-2xl">
+        <div className="bg-white rounded-2xl border border-amber-100 shadow-md p-8">
           <form onSubmit={loginHandle} className="space-y-4">
             <div className="relative">
-              <FontAwesomeIcon icon={faUser} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm" />
+              <FontAwesomeIcon icon={faUser} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm" />
               <input
                 className="input-base pl-9"
                 placeholder="Usuario"
@@ -63,7 +63,7 @@ const Login = ({ onLogin, onRegister }) => {
             </div>
 
             <div className="relative">
-              <FontAwesomeIcon icon={faLock} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm" />
+              <FontAwesomeIcon icon={faLock} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm" />
               <input
                 className="input-base pl-9"
                 placeholder="Contraseña"
@@ -83,7 +83,7 @@ const Login = ({ onLogin, onRegister }) => {
           <button
             type="button"
             onClick={onRegister}
-            className="w-full text-center text-amber-500 hover:text-amber-400 text-sm mt-4 transition-colors"
+            className="w-full text-center text-amber-600 hover:text-amber-700 text-sm mt-4 transition-colors"
           >
             ¿No tenés cuenta? Registrate
           </button>
