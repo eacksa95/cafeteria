@@ -15,15 +15,15 @@ class JSONStringField(serializers.Field):
         return value if value is not None else []
 
     def to_internal_value(self, data):
+        # Djongo espera recibir list/dict en get_prep_value — no convertir a string.
         if isinstance(data, (list, dict)):
-            return json.dumps(data)
+            return data
         if isinstance(data, str):
             try:
-                json.loads(data)
-                return data
+                return json.loads(data)  # parsear string JSON a objeto Python
             except json.JSONDecodeError:
                 raise serializers.ValidationError('JSON inválido')
-        return json.dumps([])
+        return []
 
 
 class PedidoSerializer(serializers.ModelSerializer):
