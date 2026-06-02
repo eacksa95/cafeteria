@@ -181,9 +181,9 @@ export const useUpdateProducto = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, ...producto }) => 
+    mutationFn: ({ id, ...producto }) =>
       fetchWithAuth(`/productos/${id}/`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(producto),
       }),
     onSuccess: () => {

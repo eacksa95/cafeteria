@@ -25,11 +25,12 @@ const ProductosModificar = ({ setMensaje, role }) => {
 
   useEffect(() => {
     if (producto) setForm({
-      nombre:    producto.nombre    || '',
-      precio:    producto.precio    || '',
-      cantidad:  producto.cantidad  || 1,
-      img:       producto.img       || '',
-      categoria: producto.categoria || 'otro',
+      nombre:       producto.nombre       || '',
+      precio:       producto.precio       || '',
+      cantidad:     producto.cantidad     || 1,
+      img:          producto.img          || '',
+      categoria:    producto.categoria    || 'otro',
+      categoria_id: producto.categoria_id || 1,
     });
   }, [producto]);
 
