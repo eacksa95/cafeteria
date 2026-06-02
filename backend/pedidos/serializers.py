@@ -38,5 +38,6 @@ class PedidoSerializer(serializers.ModelSerializer):
             'monto', 'estado',
             'fecha_recepcion', 'hora_recepcion',
             'hora_listo', 'hora_entregado',
+            'creado_por_id', 'procesado_por_id', 'entregado_por_id',
         ]
         read_only_fields = ['fecha_recepcion', 'hora_recepcion']

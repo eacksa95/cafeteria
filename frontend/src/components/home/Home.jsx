@@ -57,9 +57,9 @@ function AppRoutes({ userId, role, username, setMensaje, onLogout, mostrarMensaj
           <Route path="/noauth" element={<NoAuth />} />
 
           <Route element={<ProtectedRoute isAllowed={!!role} />}>
-            <Route path="/pedidosindex"    element={<Pedidos setMensaje={setMensaje} />} />
-            <Route path="/pedidospendientes" element={<Pedidos setMensaje={setMensaje} />} />
-            <Route path="/pedidoslistos"   element={<Pedidos setMensaje={setMensaje} />} />
+            <Route path="/pedidosindex"    element={<Pedidos setMensaje={setMensaje} userId={userId} />} />
+            <Route path="/pedidospendientes" element={<Pedidos setMensaje={setMensaje} userId={userId} />} />
+            <Route path="/pedidoslistos"   element={<Pedidos setMensaje={setMensaje} userId={userId} />} />
           </Route>
 
           <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!role && canViewProducts} />}>
@@ -69,7 +69,7 @@ function AppRoutes({ userId, role, username, setMensaje, onLogout, mostrarMensaj
           </Route>
 
           <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!role && canViewCarrito} />}>
-            <Route path="/carrito" element={<CarritoIndex setMensaje={setMensaje} />} />
+            <Route path="/carrito" element={<CarritoIndex setMensaje={setMensaje} userId={userId} />} />
           </Route>
 
           <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!role && isAdmin} />}>
