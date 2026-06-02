@@ -2,44 +2,37 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
-import { useProducto, useUpdateProducto } from '../../api/queries';
+import { useProducto, useUpdateProducto, useCategorias } from '../../api/queries';
 import CloudinaryUpload from '../common/CloudinaryUpload';
 
-const CATS = [
-  { value: 'cafe',     label: 'Cafés y calientes' },
-  { value: 'bebida',   label: 'Bebidas frías' },
-  { value: 'desayuno', label: 'Desayunos' },
-  { value: 'comida',   label: 'Comidas' },
-  { value: 'postre',   label: 'Postres' },
-  { value: 'otro',     label: 'Otro' },
-];
-
 const ProductosModificar = ({ setMensaje, role }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id }    = useParams();
+  const navigate  = useNavigate();
   const { data: producto, isLoading, error } = useProducto(id);
   const updateMutation = useUpdateProducto();
+  const { data: categorias = [] } = useCategorias();
   const isAdmin = role === 'admin';
 
-  const [form, setForm] = useState({ nombre: '', precio: '', cantidad: 1, img: '', categoria: 'otro' });
+  const [form, setForm] = useState({ nombre: '', precio: '', img: '', categoria_id: 1 });
 
   useEffect(() => {
     if (producto) setForm({
       nombre:       producto.nombre       || '',
       precio:       producto.precio       || '',
-      cantidad:     producto.cantidad     || 1,
       img:          producto.img          || '',
-      categoria:    producto.categoria    || 'otro',
       categoria_id: producto.categoria_id || 1,
     });
   }, [producto]);
 
-  const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  const handle    = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  const handleInt = e => setForm(p => ({ ...p, [e.target.name]: Number(e.target.value) }));
 
   const submit = async e => {
     e.preventDefault();
     try {
-      const data = isAdmin ? form : { nombre: form.nombre, cantidad: form.cantidad, img: form.img };
+      const data = isAdmin
+        ? { nombre: form.nombre, precio: form.precio, img: form.img, categoria_id: form.categoria_id }
+        : { nombre: form.nombre, img: form.img };
       await updateMutation.mutateAsync({ id, ...data });
       setMensaje('Producto actualizado');
       navigate('/productosindex');
@@ -51,9 +44,9 @@ const ProductosModificar = ({ setMensaje, role }) => {
 
   return (
     <div className="card max-w-md">
-      <h3 className="text-base font-semibold text-stone-800 mb-1">Modificar Producto</h3>
+      <h3 className="text-base font-semibold text-stone-100 mb-1">Modificar Producto</h3>
       <p className="text-stone-400 text-sm mb-4">
-        Actualizá: <span className="text-amber-700 font-medium">{producto?.nombre}</span>
+        Actualizá: <span className="text-amber-400 font-medium">{producto?.nombre}</span>
       </p>
 
       <form onSubmit={submit} className="space-y-3">
@@ -72,8 +65,17 @@ const ProductosModificar = ({ setMensaje, role }) => {
           )}
         </div>
 
-        <select className="input-base" name="categoria" value={form.categoria} onChange={handle}>
-          {CATS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+        <select
+          className={`input-base ${!isAdmin ? 'opacity-60 cursor-not-allowed' : ''}`}
+          name="categoria_id"
+          value={form.categoria_id}
+          onChange={handleInt}
+          disabled={!isAdmin}
+        >
+          {categorias.map(c => (
+            <option key={c.id} value={c.id}>{c.emoji} {c.nombre}</option>
+          ))}
+          {!categorias.length && <option value={1}>Cargando categorías...</option>}
         </select>
 
         <CloudinaryUpload
@@ -82,8 +84,8 @@ const ProductosModificar = ({ setMensaje, role }) => {
           onRemove={() => setForm(p => ({ ...p, img: '' }))}
         />
 
-        <button type="submit" className="btn-primary w-full" disabled={updateMutation.isLoading}>
-          {updateMutation.isLoading ? 'Guardando...' : 'Guardar cambios'}
+        <button type="submit" className="btn-primary w-full" disabled={updateMutation.isPending}>
+          {updateMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </form>
     </div>
