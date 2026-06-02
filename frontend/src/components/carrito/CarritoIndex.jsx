@@ -195,17 +195,26 @@ export const CarritoIndex = ({ setMensaje, userId }) => {
               const inCart = cart.find(i => i.id === p.id);
               return (
                 <div key={p.id} className="bg-white rounded-xl border border-amber-100 shadow-sm overflow-hidden">
-                  {/* Imagen o emoji de categoría */}
-                  <div className="h-16 bg-amber-50 flex items-center justify-center overflow-hidden">
+                  {/* Imagen más grande */}
+                  <div className="relative h-24 bg-amber-50 flex items-center justify-center overflow-hidden">
                     {p.img
                       ? <img src={p.img} alt={p.nombre} className="w-full h-full object-cover"
-                          onError={e => { e.target.parentNode.innerHTML = `<span style="font-size:2rem">${CAT_EMOJI[p.categoria_id] || '🍽️'}</span>`; }} />
-                      : <span style={{ fontSize: '2rem' }}>{CAT_EMOJI[p.categoria_id] || '🍽️'}</span>
+                          onError={e => { e.target.parentNode.innerHTML = `<span style="font-size:2.5rem">${CAT_EMOJI[p.categoria_id] || '🍽️'}</span>`; }} />
+                      : <span style={{ fontSize: '2.5rem' }}>{CAT_EMOJI[p.categoria_id] || '🍽️'}</span>
                     }
+                    {/* Badge cantidad en carrito */}
+                    {inCart && (
+                      <span className="absolute top-1 right-1 bg-amber-600 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center shadow">
+                        {inCart.qty}
+                      </span>
+                    )}
                   </div>
-                  <div className="p-2">
-                    <p className="text-stone-800 text-xs font-semibold line-clamp-2 leading-snug mb-0.5">{p.nombre}</p>
-                    <p className="text-amber-700 font-bold text-sm mb-2">${Number(p.precio).toLocaleString()}</p>
+                  <div className="px-2 py-1.5">
+                    {/* Nombre + precio en una línea */}
+                    <div className="flex items-baseline gap-1 mb-1.5">
+                      <p className="text-stone-800 text-xs font-semibold truncate flex-1">{p.nombre}</p>
+                      <p className="text-amber-600 font-bold text-xs flex-shrink-0">${Number(p.precio).toLocaleString()}</p>
+                    </div>
                     {inCart ? (
                       <div className="flex items-center justify-between gap-1">
                         <button onClick={() => changeQty(p.id, -1)} className="flex-1 h-6 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded text-xs">−</button>
