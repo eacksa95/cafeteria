@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser, useUpdateUser } from '../../api/queries';
+import ProfilePhotoUpload from '../common/ProfilePhotoUpload';
 
 const ROLES = [
   { value: 'admin',    label: 'Administrador' },
@@ -14,10 +15,19 @@ const UsuariosModificar = ({ setMensaje }) => {
   const navigate = useNavigate();
   const { data: user, isLoading, error } = useUser(id);
   const updateUser = useUpdateUser();
-  const [form, setForm] = useState({ username: '', first_name: '', last_name: '', email: '', group_name: 'mozo' });
+  const [form, setForm] = useState({
+    username: '', first_name: '', last_name: '', email: '', group_name: 'mozo', foto_url: '',
+  });
 
   useEffect(() => {
-    if (user) setForm({ username: user.username || '', first_name: user.first_name || '', last_name: user.last_name || '', email: user.email || '', group_name: user.group_name || 'mozo' });
+    if (user) setForm({
+      username:   user.username   || '',
+      first_name: user.first_name || '',
+      last_name:  user.last_name  || '',
+      email:      user.email      || '',
+      group_name: user.group_name || 'mozo',
+      foto_url:   user.foto_url   || '',
+    });
   }, [user]);
 
   const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -37,20 +47,33 @@ const UsuariosModificar = ({ setMensaje }) => {
   return (
     <div className="card max-w-md">
       <h3 className="text-lg font-semibold text-stone-100 mb-1">Modificar Usuario</h3>
-      <p className="text-stone-400 text-sm mb-5">Actualizá los datos de <span className="text-amber-400">{user?.username}</span></p>
+      <p className="text-stone-400 text-sm mb-5">
+        Actualizá los datos de <span className="text-amber-400">{user?.username}</span>
+      </p>
 
-      <form onSubmit={submit} className="space-y-3">
+      <form onSubmit={submit} className="space-y-4">
+        {/* Foto de perfil */}
+        <div className="flex justify-center mb-2">
+          <ProfilePhotoUpload
+            currentUrl={form.foto_url}
+            onUpload={url => setForm(p => ({ ...p, foto_url: url }))}
+            onRemove={() => setForm(p => ({ ...p, foto_url: '' }))}
+            size="lg"
+          />
+        </div>
+
         <input className="input-base" name="username" placeholder="Usuario" required value={form.username} onChange={handle} />
         <div className="grid grid-cols-2 gap-2">
           <input className="input-base" name="first_name" placeholder="Nombre" value={form.first_name} onChange={handle} />
-          <input className="input-base" name="last_name" placeholder="Apellido" value={form.last_name} onChange={handle} />
+          <input className="input-base" name="last_name"  placeholder="Apellido" value={form.last_name}  onChange={handle} />
         </div>
         <input className="input-base" type="email" name="email" placeholder="Email" required value={form.email} onChange={handle} />
         <select className="input-base" name="group_name" value={form.group_name} onChange={handle}>
           {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
         </select>
-        <button type="submit" className="btn-primary w-full" disabled={updateUser.isLoading}>
-          {updateUser.isLoading ? 'Actualizando...' : 'Guardar cambios'}
+
+        <button type="submit" className="btn-primary w-full" disabled={updateUser.isPending}>
+          {updateUser.isPending ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </form>
     </div>

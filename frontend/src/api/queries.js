@@ -16,7 +16,8 @@ const fetchWithAuth = async (url, options = {}) => {
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
-  
+
+  if (response.status === 204) return null;
   return response.json();
 };
 
@@ -194,11 +195,24 @@ export const useUpdateProducto = () => {
 
 export const useDeleteProducto = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id) => 
+    mutationFn: (id) =>
+      fetchWithAuth(`/productos/${id}/`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['productos']);
+    },
+  });
+};
+
+export const useDarBajaProducto = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, disponible }) =>
       fetchWithAuth(`/productos/${id}/`, {
-        method: 'DELETE',
+        method: 'PATCH',
+        body: JSON.stringify({ disponible }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries(['productos']);
