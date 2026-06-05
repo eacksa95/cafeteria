@@ -1,6 +1,6 @@
 # Cafetería — Documentación de Desarrollo
 > Documento de trabajo interno. Uso: Ezequiel Cristaldo + Claude (IA).
-> Última actualización: Mayo 2026 — Roles redefinidos, registro público implementado
+> Última actualización: Junio 2026 — PWA instalada, precios en Gs., tabla paginada, SSE/WebSocket pendiente
 
 ---
 
@@ -177,6 +177,37 @@ PENDIENTE → EN_PROCESO → LISTO → ENTREGADO
 - [ ] Ranking de productos más pedidos
 - [ ] Actividad por mozo / cocinero
 - [ ] Exportar a CSV o PDF
+
+### 9. Tiempo real — SSE (Server-Sent Events)
+> **Por qué SSE y no WebSockets:**
+> WebSockets son bidireccionales (cliente ↔ servidor). Para la cocina, solo se necesita que el SERVIDOR envíe nuevos pedidos al cliente — es unidireccional. SSE es más simple: no requiere Django Channels ni Redis. Railway lo soporta nativamente con gunicorn+gevent. Un `EventSource` en el frontend, una vista de streaming en Django.
+
+- [ ] Endpoint SSE: `GET /pedidos/stream/` — streaming con `text/event-stream`
+- [ ] Frontend: `useEffect` con `new EventSource(...)` que invalida cache de React Query al recibir evento
+- [ ] Reducir `refetchInterval` de 10s a 30s una vez SSE funcione (el polling es backup)
+- [ ] Pantalla cocina se actualiza en <1 segundo cuando el mozo envía un pedido
+
+### 10. PWA — Instalable como app nativa
+> **YA IMPLEMENTADO** (vite-plugin-pwa configurado en vite.config.js)
+
+- [x] `vite-plugin-pwa` instalado y configurado
+- [x] Manifest con nombre, íconos, tema amber-900, display: standalone
+- [x] Service Worker con cache de assets estáticos y imágenes Cloudinary
+- [ ] Probar instalación en Android (Chrome → "Agregar a pantalla de inicio")
+- [ ] Probar instalación en iPad/tablet de cocina
+- [ ] Ícono PWA dedicado (192x192 y 512x512 PNG, sin fondo)
+
+### 11. QR Code del menú para mesas
+- [ ] Instalar `qrcode`: `npm install qrcode @types/qrcode`
+- [ ] Componente `QRMenu.jsx` en panel admin: genera QR que apunta a `/carta`
+- [ ] Opción de descargar como PNG para imprimir y poner en cada mesa
+- [ ] El cliente escanea → ve la carta digital en su teléfono → cero fricción
+
+### 12. Modo demo para portafolio
+- [ ] Usuario `demo_mozo` en producción (rol: mozo, contraseña pública)
+- [ ] Botón "Probar demo" en la card de Cafetería del portafolio
+- [ ] Al hacer clic: abre `cafeteria-fe.netlify.app` con auto-login o modal de instrucciones
+- [ ] El visitante puede agregar productos al carrito y ver el pedido en la "cocina" (otra tab)
 
 ### 9. Infraestructura / Calidad
 - [ ] Tests unitarios para los endpoints principales (pytest-django)
