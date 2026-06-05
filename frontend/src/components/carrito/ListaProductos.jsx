@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useProductos } from '../../api/queries';
+import { fmtPrecio } from '../../utils/format';
 
 const IMG_FALLBACK = 'https://png.pngtree.com/template/20190323/ourmid/pngtree-coffee-logo-design-image_82183.jpg';
 
@@ -46,7 +47,7 @@ export const ListaProductos = ({ allProducts, setAllProducts, countProducts, set
             </div>
             <div className="p-2.5">
               <p className="text-stone-100 text-sm font-medium truncate">{p.nombre}</p>
-              <p className="text-amber-400 text-sm font-bold">${Number(p.precio).toFixed(2)}</p>
+              <p className="text-amber-400 text-sm font-bold">{fmtPrecio(p.precio)}</p>
             </div>
           </div>
         ))}

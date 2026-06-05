@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useUser } from '../../api/queries';
+import { useUser, useProductos } from '../../api/queries';
+import { useQueryClient } from '@tanstack/react-query';
 import Navbar from './Navbar';
 import BottomNav from './BottomNav';
 import { Foo } from './Foo';
@@ -33,6 +34,42 @@ const TITLES = {
   '/usuariosnuevo':  'Nuevo usuario',
 };
 
+// ── Preloader silencioso — carga imágenes y datos en background ──────────────
+function DataPreloader({ userId }) {
+  const { data: productos } = useProductos();
+  const queryClient = useQueryClient();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+
+  // Precargar imágenes de productos en la caché del navegador
+  useEffect(() => {
+    if (!productos?.length) return;
+    productos.forEach(p => {
+      if (p.img) {
+        const img = new window.Image();
+        img.src = p.img;
+      }
+    });
+  }, [productos]);
+
+  // Prefetch de pedidos en background tras login
+  useEffect(() => {
+    if (!userId) return;
+    const raw = window.localStorage.getItem('accessToken');
+    if (!raw) return;
+    const headers = {
+      Authorization: `Bearer ${JSON.parse(raw)}`,
+      'Content-Type': 'application/json',
+    };
+    queryClient.prefetchQuery({
+      queryKey: ['pedidos'],
+      queryFn: () => fetch(`${API_URL}/pedidos/`, { headers }).then(r => r.json()),
+      staleTime: 60 * 1000,
+    });
+  }, [userId]);
+
+  return null;
+}
+
 function AppRoutes({ userId, role, username, setMensaje, onLogout, mostrarMensaje, mensaje }) {
   const { pathname } = useLocation();
   const title = TITLES[pathname] ?? TITLES[Object.keys(TITLES).find(k => pathname.startsWith(k) && k !== '/') || ''];
@@ -43,6 +80,7 @@ function AppRoutes({ userId, role, username, setMensaje, onLogout, mostrarMensaj
 
   return (
     <div className="min-h-screen bg-amber-50 flex flex-col">
+      <DataPreloader userId={userId} />
       <Navbar onLogout={onLogout} role={role} username={username} title={title} />
 
       {mostrarMensaje && (
@@ -63,7 +101,7 @@ function AppRoutes({ userId, role, username, setMensaje, onLogout, mostrarMensaj
           </Route>
 
           <Route element={<ProtectedRoute redirectTo="/noauth" isAllowed={!!role && canViewProducts} />}>
-            <Route path="/productosindex" element={<ProductosIndex role={role}><ProductosTabla setMensaje={setMensaje} /></ProductosIndex>} />
+            <Route path="/productosindex" element={<ProductosIndex role={role}><ProductosTabla setMensaje={setMensaje} role={role} /></ProductosIndex>} />
             <Route path="/productosnuevo" element={<ProductosIndex role={role}><ProductosNuevo setMensaje={setMensaje} role={role} /></ProductosIndex>} />
             <Route path="/productosmodificar/:id" element={<ProductosIndex role={role}><ProductosModificar setMensaje={setMensaje} role={role} /></ProductosIndex>} />
           </Route>

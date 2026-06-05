@@ -5,6 +5,7 @@ import {
   faPaperPlane, faChevronDown, faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
 import { useProductos, useCategorias } from '../../api/queries';
+import { fmtPrecio } from '../../utils/format';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 const CAT_EMOJI = { 1: '☕', 2: '🥤', 3: '🥐', 4: '🍟', 5: '🍽️', 6: '🍰' };
@@ -96,7 +97,7 @@ export const CarritoIndex = ({ setMensaje, userId }) => {
               )}
             </div>
             <span className="text-sm font-semibold text-stone-700">
-              {count > 0 ? `${count} ítem${count > 1 ? 's' : ''} · $${total.toLocaleString()}` : 'Carrito vacío'}
+              {count > 0 ? `${count} ítem${count > 1 ? 's' : ''} · ${fmtPrecio(total)}` : 'Carrito vacío'}
             </span>
             <FontAwesomeIcon icon={cartOpen ? faChevronUp : faChevronDown} className="text-stone-400 text-xs ml-auto" />
           </button>
@@ -139,7 +140,7 @@ export const CarritoIndex = ({ setMensaje, userId }) => {
                     <span className="text-base">{CAT_EMOJI[i.categoria_id] || '🍽️'}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-stone-700 text-xs font-medium truncate">{i.nombre}</p>
-                      <p className="text-amber-600 text-xs">${(Number(i.precio) * i.qty).toLocaleString()}</p>
+                      <p className="text-amber-600 text-xs">{fmtPrecio(Number(i.precio) * i.qty)}</p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button onClick={() => changeQty(i.id, -1)} className="w-5 h-5 bg-stone-100 hover:bg-stone-200 rounded text-stone-600 text-xs flex items-center justify-center">−</button>
@@ -205,7 +206,7 @@ export const CarritoIndex = ({ setMensaje, userId }) => {
                   </div>
                   <div className="p-2">
                     <p className="text-stone-800 text-xs font-semibold line-clamp-2 leading-snug mb-0.5">{p.nombre}</p>
-                    <p className="text-amber-700 font-bold text-sm mb-2">${Number(p.precio).toLocaleString()}</p>
+                    <p className="text-amber-700 font-bold text-sm mb-2">{fmtPrecio(p.precio)}</p>
                     {inCart ? (
                       <div className="flex items-center justify-between gap-1">
                         <button onClick={() => changeQty(p.id, -1)} className="flex-1 h-6 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded text-xs">−</button>

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMugHot, faHouse, faShoppingCart, faTimes, faPlus, faMinus, faTrash, faPaperPlane,
 } from '@fortawesome/free-solid-svg-icons';
+import { fmtPrecio } from '../../utils/format';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
@@ -105,7 +106,7 @@ export default function CartaMozo() {
         <button onClick={() => setCartOpen(true)} className="relative flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
           <FontAwesomeIcon icon={faShoppingCart} />
           {count > 0 && <span className="bg-white text-amber-700 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">{count}</span>}
-          <span className="hidden sm:inline">${total.toFixed(0)}</span>
+          <span className="hidden sm:inline">{fmtPrecio(total)}</span>
         </button>
       </header>
 
@@ -152,7 +153,7 @@ export default function CartaMozo() {
                 </div>
                 <div className="p-2.5">
                   <p className="text-stone-100 text-xs font-semibold leading-snug mb-0.5 line-clamp-2">{p.nombre}</p>
-                  <p className="text-amber-400 font-bold text-sm mb-2">${Number(p.precio).toLocaleString()}</p>
+                  <p className="text-amber-400 font-bold text-sm mb-2">{fmtPrecio(p.precio)}</p>
                   {inCart ? (
                     <div className="flex items-center justify-between">
                       <button onClick={() => changeQty(p.id, -1)} className="w-7 h-7 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors">
@@ -194,7 +195,7 @@ export default function CartaMozo() {
                   <span className="text-lg">{CAT_EMOJI[i.categoria_id] || '🍽️'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-stone-200 text-sm font-medium truncate">{i.nombre}</p>
-                    <p className="text-amber-400 text-xs">${(Number(i.precio) * i.qty).toLocaleString()}</p>
+                    <p className="text-amber-400 text-xs">{fmtPrecio(Number(i.precio) * i.qty)}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={() => changeQty(i.id, -1)} className="w-6 h-6 bg-stone-800 rounded text-stone-400 flex items-center justify-center">
@@ -217,7 +218,7 @@ export default function CartaMozo() {
               <div className="px-5 py-4 border-t border-stone-800 space-y-3">
                 <div className="flex justify-between font-bold">
                   <span className="text-stone-300">Total</span>
-                  <span className="text-amber-400 text-lg">${total.toLocaleString()}</span>
+                  <span className="text-amber-400 text-lg">{fmtPrecio(total)}</span>
                 </div>
                 <input
                   className="input-base"

@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMugHot, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { fmtPrecio } from '../../utils/format';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
@@ -84,7 +85,7 @@ export default function CartaTv2() {
                       </span>
                     </div>
                     <span className={`text-sm font-bold flex-shrink-0 ml-2 ${p.disponible ? 'text-amber-400' : 'text-stone-600'}`}>
-                      ${Number(p.precio).toLocaleString()}
+                      {fmtPrecio(p.precio)}
                     </span>
                   </div>
                 ))}

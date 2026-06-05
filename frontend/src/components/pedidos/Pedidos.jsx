@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { usePedidos, useUpdatePedido, useDeletePedido, useProductos } from '../../api/queries';
+import { fmtPrecio } from '../../utils/format';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function toList(val) {

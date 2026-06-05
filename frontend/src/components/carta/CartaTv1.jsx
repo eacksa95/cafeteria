@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMugHot } from '@fortawesome/free-solid-svg-icons';
+import { fmtPrecio } from '../../utils/format';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 const CAT_EMOJI = { 1: '☕', 2: '🥤', 3: '🥐', 4: '🍟', 5: '🍽️', 6: '🍰' };
@@ -79,7 +80,7 @@ export default function CartaTv1() {
             <div className="text-center lg:text-left">
               {prod.descripcion && <p className="text-stone-400 text-xl mb-3">{prod.descripcion}</p>}
               <h2 className="text-6xl lg:text-7xl font-bold text-stone-100 leading-tight mb-4">{prod.nombre}</h2>
-              <p className="text-7xl font-black text-amber-400">${Number(prod.precio).toLocaleString()}</p>
+              <p className="text-7xl font-black text-amber-400">{fmtPrecio(prod.precio)}</p>
             </div>
           </div>
         ) : (
